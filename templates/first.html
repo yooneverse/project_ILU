@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>ILU(일루) – 나만의 조직 취향 큐레이션, ILU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: #f5f7f8;
+      color: #222;
+      line-height: 1.5;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* 공통 레이아웃 */
+    .page-wrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* 헤더 */
+    header {
+      border-bottom: 1px solid #e1e5ea;
+      background-color: #ffffff;
+    }
+
+    .header-inner {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 20px;
+      color: #1b5e20;
+    }
+
+    .brand span {
+      font-weight: 400;
+      font-size: 14px;
+      margin-left: 6px;
+      color: #4f5b62;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 14px;
+    }
+
+    .nav-link {
+      color: #455a64;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 14px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-outline {
+      border-color: #2e7d32;
+      color: #2e7d32;
+      background-color: transparent;
+    }
+
+    .btn-outline:hover {
+      background-color: #e8f5e9;
+    }
+
+    .btn-primary {
+      background-color: #2e7d32;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: #256628;
+    }
+
+    /* 히어로 영역 */
+    .hero {
+      background: #e8f5e9;
+      padding: 64px 0 56px;
+      border-bottom: 1px solid #d0e2d3;
+    }
+
+    .hero-inner {
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: #c8e6c9;
+      font-size: 13px;
+      color: #388e3c;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 30px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #1b5e20;
+    }
+
+    .hero-highlight {
+      color: #2e7d32;
+    }
+
+    .hero-sub {
+      font-size: 14px;
+      color: #455a64;
+      margin-bottom: 28px;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .hero-caption {
+      font-size: 12px;
+      color: #78909c;
+      margin-top: 8px;
+    }
+
+    /* 기능 3개 카드 */
+    .feature-section {
+      background: #f5f7f8;
+      padding: 40px 0 32px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 28px;
+      color: #263238;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 22px 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      border: 1px solid #e0e3e7;
+    }
+
+    .feature-label {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      margin-bottom: 10px;
+    }
+
+    .feature-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #263238;
+    }
+
+    .feature-desc {
+      font-size: 13px;
+      color: #607d8b;
+    }
+
+    /* WAY 섹션 */
+    .way-section {
+      padding: 40px 0 40px;
+      background: #ffffff;
+    }
+
+    .way-title {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: #263238;
+    }
+
+    .way-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .way-card {
+      border-radius: 12px;
+      padding: 20px 20px 18px;
+      border: 1px solid #c8e6c9;
+      background: #f9fffb;
+    }
+
+    .way-card.danger {
+      border-color: #ffcdd2;
+      background: #fff5f5;
+    }
+
+    .way-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .way-list {
+      list-style: none;
+      font-size: 13px;
+    }
+
+    .way-list li {
+      margin-bottom: 4px;
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+    }
+
+    .way-list li span.icon {
+      font-weight: 700;
+    }
+
+    .way-list li span.text {
+      color: #546e7a;
+    }
+
+    .way-card.danger li span.icon {
+      color: #e53935;
+    }
+
+    .way-card.danger li span.text {
+      color: #b71c1c;
+    }
+
+    .way-card.safe li span.icon {
+      color: #2e7d32;
+    }
+
+    /* 인용 + 하단 CTA */
+    .quote-section {
+      padding: 32px 0 36px;
+      background: #f5f7f8;
+      text-align: center;
+    }
+
+    .quote-text {
+      font-size: 15px;
+      color: #455a64;
+      margin-bottom: 16px;
+    }
+
+    .quote-strong {
+      color: #2e7d32;
+      font-weight: 600;
+    }
+
+    /* 푸터 */
+    footer {
+      margin-top: auto;
+      padding: 20px 0 24px;
+      background: #ffffff;
+      border-top: 1px solid #e1e5ea;
+      font-size: 12px;
+      color: #90a4ae;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .footer-link {
+      color: #90a4ae;
+    }
+
+    /* 반응형 */
+    @media (max-width: 900px) {
+      .features {
+        grid-template-columns: 1fr;
+      }
+      .way-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-title {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header-inner {
+        flex-direction: row;
+        gap: 8px;
+      }
+      .nav-right {
+        gap: 8px;
+      }
+      .hero {
+        padding: 40px 0 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- 헤더 -->
+  <header>
+    <div class="container header-inner">
+      <div class="brand">
+        ILU
+        <span>(일루)</span>
+      </div>
+      <div class="nav-right">
+        <a href="#" class="nav-link">서비스 소개</a>
+        <button class="btn btn-outline">로그인</button>
+        <button class="btn btn-primary">회원가입</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 히어로 -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-badge">조직문화 매칭 플랫폼</div>
+      <h1 class="hero-title">
+        나만의 조직 취향 큐레이션, <span class="hero-highlight">일루</span>로 와!
+      </h1>
+      <p class="hero-sub">
+        주어진 환경이 아닌, 일하는 방식과 ‘각’이 맞는 조직 문화를 기준으로 찾는 회사 탐색
+      </p>
+      <div class="hero-cta">
+        <button class="btn btn-primary">내 WORK TYPE 찾으러 가기</button>
+      </div>
+      <p class="hero-caption">10분 정도면 나에게 맞는 조직 스타일을 확인할 수 있어요.</p>
+    </div>
+  </section>
+
+  <!-- 기능 3개 -->
+  <section class="feature-section">
+    <div class="container">
+      <h2 class="section-title">ILU는 이렇게 당신과 여정을 함께합니다.</h2>
+      <div class="features">
+        <article class="feature-card">
+          <div class="feature-label">STEP 1</div>
+          <h3 class="feature-title">성향 분석</h3>
+          <p class="feature-desc">
+            간단한 문항에 답하는 것만으로<br>
+            일할 때 드러나는 나의 패턴을 파악합니다.
+          </p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-label">STEP 2</div>
+          <h3 class="feature-title">WorkStyle Profile</h3>
+          <p class="feature-desc">
+            협업 스타일, 의사소통 방식, 선호 환경 등을<br>
+            한 번에 볼 수 있는 프로필로 만들어 보여드립니다.
+          </p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-label">STEP 3</div>
+          <h3 class="feature-title">기업 데이터 매칭</h3>
+          <p class="feature-desc">
+            기업의 조직문화·업무 방식 데이터를 바탕으로<br>
+            나와 어울리는 조직을 라인업으로 추천합니다.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAY 섹션 -->
+  <section class="way-section">
+    <div class="container">
+      <h2 class="way-title">ILU-WAY: 일루의, 일루만의 길</h2>
+      <div class="way-grid">
+        <div class="way-card danger">
+          <h3 class="way-card-title">기존 채용 서비스</h3>
+          <ul class="way-list">
+            <li><span class="icon">•</span><span class="text">스펙과 직무 중심의 일방향 추천</span></li>
+            <li><span class="icon">•</span><span class="text">조직문화·팀 분위기에 대한 정보 부족</span></li>
+            <li><span class="icon">•</span><span class="text">입사 후에야 알게 되는 “나와 안 맞는 환경”</span></li>
+          </ul>
+        </div>
+        <div class="way-card safe">
+          <h3 class="way-card-title">ILU NEW VIEW</h3>
+          <ul class="way-list">
+            <li><span class="icon">•</span><span class="text">WorkStyle 기반으로 일하는 방식을 먼저 이해</span></li>
+            <li><span class="icon">•</span><span class="text">조직문화 적합도를 기준으로 기업을 탐색</span></li>
+            <li><span class="icon">•</span><span class="text">내가 편하게 일할 수 있는 팀을 미리 가늠</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 인용 & 하단 CTA -->
+  <section class="quote-section">
+    <div class="container">
+      <p class="quote-text">
+        “취업은 단지 나를 기업에 맞추는 것이 아니라,<br>
+        <span class="quote-strong">내 성향에 맞는 환경을 선택하는 과정</span>입니다.”
+      </p>
+      <div style="margin-top:16px;">
+        <button class="btn btn-primary">WorkStyle 진단부터 다시 해보기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 푸터 -->
+  <footer>
+    <div class="container footer-inner">
+      <span>© 2025 ILU</span>
+      <span>|</span>
+      <a href="#" class="footer-link">개인정보 처리방침</a>
+      <span>|</span>
+      <a href="#" class="footer-link">이용약관</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
