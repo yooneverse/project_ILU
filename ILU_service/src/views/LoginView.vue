@@ -26,7 +26,7 @@
           />
         </div>
 
-        <!-- 에러 영역 (항상 자리 차지) -->
+        <!-- 에러 영역 (레이아웃 고정) -->
         <p class="error-message" :class="{ visible: errorMessage }">
           {{ errorMessage || ' ' }}
         </p>
@@ -46,34 +46,69 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
+import { useRouter, useRoute, RouterLink } from 'vue-router'
+import api from '@/api/axios'
+import { useAuthStore } from '@/stores/auth'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const route = useRoute()            
+const authStore = useAuthStore()
+const userStore = useUserStore()
 
 const username = ref('')
 const password = ref('')
 const errorMessage = ref('')
 
-const handleLogin = () => {
-  const users = JSON.parse(localStorage.getItem('users') || '[]')
-  const user = users.find(
-    u => u.username === username.value && u.password === password.value
-  )
+const handleLogin = async () => {
+  errorMessage.value = ''
 
-  if (user) {
-    localStorage.setItem('currentUser', JSON.stringify(user))
-    window.dispatchEvent(new Event('storage'))
-    router.push('/survey')
-  } else {
-    errorMessage.value = '아이디 또는 비밀번호가 일치하지 않습니다.'
+  try {
+    /* JWT 로그인 */
+    const tokenRes = await api.post('/token/', {
+      username: username.value,
+      password: password.value,
+    })
+
+    localStorage.setItem('access', tokenRes.data.access)
+    localStorage.setItem('refresh', tokenRes.data.refresh)
+
+    authStore.login()
+
+    /* 내 정보 조회 */
+    const meRes = await api.get('/accounts/me/')
+    userStore.setUser(meRes.data)
+
+    /* redirect 처리 */
+    const redirectPath = route.query.redirect || '/survey'
+    router.push(redirectPath)
+
+  } catch (err) {
+    const status = err.response?.status
+
+    if (status === 401) {
+      errorMessage.value = '아이디 또는 비밀번호가 일치하지 않습니다.'
+      return
+    }
+
+    if (status === 403) {
+      errorMessage.value = '접근 권한이 없는 계정입니다.'
+      return
+    }
+
+    if (status >= 500) {
+      errorMessage.value = '서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'
+      return
+    }
+
+    errorMessage.value = '로그인에 실패했습니다.'
   }
 }
+
+
 </script>
 
 <style scoped>
-/* =====================
-   Layout
-===================== */
 .login-wrapper {
   display: flex;
   justify-content: center;
@@ -81,9 +116,6 @@ const handleLogin = () => {
   background-color: #f5f7f8;
 }
 
-/* =====================
-   Card
-===================== */
 .login-card {
   width: 100%;
   max-width: 480px;
@@ -94,9 +126,6 @@ const handleLogin = () => {
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
-/* =====================
-   Title
-===================== */
 .login-title {
   text-align: center;
   font-size: 22px;
@@ -105,9 +134,6 @@ const handleLogin = () => {
   color: #1b5e20;
 }
 
-/* =====================
-   Form
-===================== */
 .form-group {
   margin-bottom: 14px;
 }
@@ -136,9 +162,6 @@ input:focus {
   background: #ffffff;
 }
 
-/* =====================
-   Error (레이아웃 고정)
-===================== */
 .error-message {
   min-height: 18px;
   font-size: 13px;
@@ -151,9 +174,6 @@ input:focus {
   visibility: visible;
 }
 
-/* =====================
-   Button
-===================== */
 .login-btn {
   width: 100%;
   height: 44px;
@@ -163,16 +183,12 @@ input:focus {
   border: none;
   font-size: 15px;
   cursor: pointer;
-  box-sizing: border-box;
 }
 
 .login-btn:hover {
   background: #256628;
 }
 
-/* =====================
-   Links
-===================== */
 .login-links {
   margin-top: 12px;
   text-align: center;
@@ -184,18 +200,5 @@ input:focus {
   margin-left: 6px;
   color: #2e7d32;
   text-decoration: underline;
-}
-
-/* =====================
-   Mobile
-===================== */
-@media (max-width: 480px) {
-  .login-wrapper {
-    padding: 48px 12px;
-  }
-
-  .login-card {
-    padding: 24px;
-  }
 }
 </style>
