@@ -10,11 +10,10 @@ export const useAuthStore = defineStore('auth', {
     },
     logout() {
       this.isAuthenticated = false
-      localStorage.removeItem('access')
-      localStorage.removeItem('refresh')
+      localStorage.removeItem('currentUser')
     },
     restore() {
-      this.isAuthenticated = !!localStorage.getItem('access')
+      this.isAuthenticated = !!localStorage.getItem('currentUser')
     },
   },
 })

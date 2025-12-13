@@ -74,7 +74,7 @@
         <div class="modal-content" @click.stop>
           <div class="modal-header">
             <h5>정보 수정</h5>
-            <button @click="showEditModal = false" class="btn-close"></button>
+            <button @click="showEditModal = false" class="btn-close">&times;</button>
           </div>
           <div class="modal-body">
             <form @submit.prevent="updateUserInfo">
@@ -121,16 +121,22 @@ const editForm = ref({
 })
 
 const loadUserData = () => {
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null')
+  
+  if (!currentUser) {
+    console.error('로그인 정보가 없습니다.')
+    return
+  }
+  
   user.value = currentUser
   
-  editForm.value.name = currentUser.name
-  editForm.value.email = currentUser.email
+  editForm.value.name = currentUser.name || ''
+  editForm.value.email = currentUser.email || ''
 
   const result = JSON.parse(localStorage.getItem('surveyResult_' + currentUser.id) || 'null')
   if (result) {
     surveyResult.value = result
-    const flexibleCount = result.answers.filter(a => a === 'flexible').length
+    const flexibleCount = result.answers?.filter(a => a === 'flexible').length || 0
     if (flexibleCount >= 2) {
       profileType.value = '자율형 인재'
     } else {
@@ -143,21 +149,35 @@ const loadUserData = () => {
 }
 
 const updateUserInfo = () => {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null')
+  
+  if (!currentUser || !currentUser.id) {
+    alert('로그인 정보가 없습니다.')
+    return
+  }
+  
+  // users 배열 업데이트
   const users = JSON.parse(localStorage.getItem('users') || '[]')
-  const userIndex = users.findIndex(u => u.id === user.value.id)
+  const userIndex = users.findIndex(u => u.id === currentUser.id)
   
   if (userIndex !== -1) {
     users[userIndex].name = editForm.value.name
     users[userIndex].email = editForm.value.email
     localStorage.setItem('users', JSON.stringify(users))
-    
-    user.value.name = editForm.value.name
-    user.value.email = editForm.value.email
-    localStorage.setItem('currentUser', JSON.stringify(user.value))
-    
-    showEditModal.value = false
-    alert('정보가 수정되었습니다.')
   }
+  
+  // currentUser 업데이트
+  const updatedUser = {
+    ...currentUser,
+    name: editForm.value.name,
+    email: editForm.value.email
+  }
+  
+  user.value = updatedUser
+  localStorage.setItem('currentUser', JSON.stringify(updatedUser))
+  
+  showEditModal.value = false
+  alert('정보가 수정되었습니다.')
 }
 
 onMounted(() => {
