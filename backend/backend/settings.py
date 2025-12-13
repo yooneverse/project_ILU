@@ -31,9 +31,11 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'accounts',
+    'notifications',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -101,6 +104,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# REST_FRAMEWORK
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -126,3 +136,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
 
+CORS_ALLOW_ALL_ORIGINS = True     # 개발용

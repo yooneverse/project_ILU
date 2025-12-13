@@ -32,7 +32,7 @@
             id="passwordConfirm"
             v-model="form.passwordConfirm"
             type="password"
-            placeholder="설정하는 비밀번호를 다시 입력하세요"
+            placeholder="비밀번호를 다시 입력하세요"
             required
           />
         </div>
@@ -43,7 +43,7 @@
             id="email"
             v-model="form.email"
             type="email"
-            placeholder="이메일을 입력하세요"
+            placeholder="example@email.com"
             required
           />
         </div>
@@ -59,7 +59,7 @@
           />
         </div>
 
-        <!-- 에러 메시지 (항상 공간 확보) -->
+        <!-- 에러 메시지 -->
         <p class="error-message" :class="{ visible: errorMessage }">
           {{ errorMessage || ' ' }}
         </p>
@@ -85,60 +85,73 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
+import api from '@/api/axios'
 
 const router = useRouter()
-
-const errorMessage = ref('')
-const successMessage = ref('')
 
 const form = ref({
   username: '',
   password: '',
   passwordConfirm: '',
   email: '',
-  name: ''
+  name: '',
 })
 
-const handleSignup = () => {
+const errorMessage = ref('')
+const successMessage = ref('')
+
+const handleSignup = async () => {
   errorMessage.value = ''
   successMessage.value = ''
 
+  /* 프론트 단 검증 */
   if (form.value.password !== form.value.passwordConfirm) {
     errorMessage.value = '비밀번호가 일치하지 않습니다.'
     return
   }
 
-  const users = JSON.parse(localStorage.getItem('users') || '[]')
+  try {
+    /* DRF 회원가입 */
+    await api.post('/accounts/signup/', {
+      username: form.value.username,
+      password: form.value.password,
+      email: form.value.email,
+      first_name: form.value.name,
+    })
 
-  if (users.some(u => u.username === form.value.username)) {
-    errorMessage.value = '이미 사용중인 아이디입니다.'
+    /* 성공 처리 */
+    successMessage.value = '회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.'
+
+    setTimeout(() => {
+      router.push('/login')
+    }, 1500)
+
+    console.log({
+  username: form.value.username,
+  password: form.value.password,
+  email: form.value.email,
+  first_name: form.value.name,
+})
+
+  } catch (err) {
+  const data = err.response?.data
+
+  if (!data) {
+    errorMessage.value = '서버와 통신할 수 없습니다.'
     return
   }
 
-  const newUser = {
-    id: Date.now(),
-    username: form.value.username,
-    password: form.value.password,
-    email: form.value.email,
-    name: form.value.name,
-    createdAt: new Date().toISOString()
-  }
-
-  users.push(newUser)
-  localStorage.setItem('users', JSON.stringify(users))
-
-  successMessage.value = '회원가입이 완료되었습니다. 잠시 후 로그인 페이지로 이동합니다.'
-
-  setTimeout(() => {
-    router.push('/login')
-  }, 1500)
+  errorMessage.value =
+    data.username?.[0] ||
+    data.email?.[0] ||
+    data.password?.[0] ||
+    '회원가입에 실패했습니다.'
+}
 }
 </script>
 
 <style scoped>
-/* =====================
-   Layout
-===================== */
+/* 로그인 화면과 동일 스타일 */
 .login-wrapper {
   display: flex;
   justify-content: center;
@@ -146,9 +159,6 @@ const handleSignup = () => {
   background-color: #f5f7f8;
 }
 
-/* =====================
-   Card
-===================== */
 .login-card {
   width: 100%;
   max-width: 480px;
@@ -159,9 +169,6 @@ const handleSignup = () => {
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
-/* =====================
-   Title
-===================== */
 .login-title {
   text-align: center;
   font-size: 22px;
@@ -170,9 +177,6 @@ const handleSignup = () => {
   color: #1b5e20;
 }
 
-/* =====================
-   Form
-===================== */
 .form-group {
   margin-bottom: 14px;
 }
@@ -192,7 +196,6 @@ input {
   border-radius: 8px;
   border: 1px solid #cfd8dc;
   background: #fafafa;
-  box-sizing: border-box;
 }
 
 input:focus {
@@ -201,9 +204,6 @@ input:focus {
   background: #ffffff;
 }
 
-/* =====================
-   Messages (레이아웃 고정)
-===================== */
 .error-message,
 .success-message {
   min-height: 18px;
@@ -225,9 +225,6 @@ input:focus {
   visibility: visible;
 }
 
-/* =====================
-   Button
-===================== */
 .login-btn {
   width: 100%;
   height: 44px;
@@ -237,16 +234,12 @@ input:focus {
   border: none;
   font-size: 15px;
   cursor: pointer;
-  box-sizing: border-box;
 }
 
 .login-btn:hover {
   background: #256628;
 }
 
-/* =====================
-   Links
-===================== */
 .login-links {
   margin-top: 12px;
   text-align: center;
@@ -258,18 +251,5 @@ input:focus {
   margin-left: 6px;
   color: #2e7d32;
   text-decoration: underline;
-}
-
-/* =====================
-   Mobile
-===================== */
-@media (max-width: 480px) {
-  .login-wrapper {
-    padding: 48px 12px;
-  }
-
-  .login-card {
-    padding: 24px;
-  }
 }
 </style>
