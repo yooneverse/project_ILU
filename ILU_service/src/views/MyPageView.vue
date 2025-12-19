@@ -23,9 +23,23 @@
           <div v-if="surveyResult" class="card shadow mt-3">
             <div class="card-body">
               <h5 class="card-title">내 성향 프로필</h5>
-              <p class="card-text">{{ profileType }}</p>
+              <p class="card-text">
+                <strong>{{ profileType }}</strong>
+              </p>
+              <p class="text-muted small" v-if="profileDescription">
+                {{ profileDescription }}
+              </p>
               <RouterLink to="/result" class="btn btn-outline-primary btn-sm w-100">
                 결과 다시 보기
+              </RouterLink>
+            </div>
+          </div>
+
+          <div v-else class="card shadow mt-3">
+            <div class="card-body text-center">
+              <p class="text-muted">아직 설문을 완료하지 않았습니다.</p>
+              <RouterLink to="/survey" class="btn btn-primary btn-sm">
+                설문 시작하기
               </RouterLink>
             </div>
           </div>
@@ -49,58 +63,78 @@
                   </p>
                   <RouterLink 
                     :to="`/reviews/${review.id}`" 
-                    class="btn btn-sm btn-outline-primary"
+                    class="btn btn-outline-primary btn-sm"
                   >
                     상세보기
                   </RouterLink>
                 </div>
               </div>
-              <p v-else class="text-muted mb-0">작성한 리뷰가 없습니다.</p>
+              <div v-else class="text-center text-muted py-4">
+                <p>작성한 리뷰가 없습니다.</p>
+                <RouterLink to="/companies" class="btn btn-primary btn-sm">
+                  기업 둘러보기
+                </RouterLink>
+              </div>
             </div>
           </div>
 
           <div class="card shadow">
             <div class="card-header bg-white">
-              <h5 class="mb-0">작성한 댓글</h5>
+              <h5 class="mb-0">알림</h5>
             </div>
             <div class="card-body">
-              <p class="text-muted mb-0">작성한 댓글이 없습니다.</p>
+              <div v-if="notifications.length > 0">
+                <div 
+                  v-for="notif in notifications" 
+                  :key="notif.id"
+                  class="notification-item"
+                  :class="{ unread: !notif.is_read }"
+                >
+                  <p class="mb-1">{{ notif.message }}</p>
+                  <small class="text-muted">{{ notif.created_at }}</small>
+                </div>
+              </div>
+              <div v-else class="text-center text-muted py-4">
+                <p>새로운 알림이 없습니다.</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div v-if="showEditModal" class="modal-overlay" @click="showEditModal = false">
-        <div class="modal-content" @click.stop>
-          <div class="modal-header">
-            <h5>정보 수정</h5>
-            <button @click="showEditModal = false" class="btn-close">&times;</button>
+    <!-- 정보 수정 모달 -->
+    <div v-if="showEditModal" class="modal-backdrop" @click="showEditModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h5>정보 수정</h5>
+          <button @click="showEditModal = false" class="btn-close">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">이름</label>
+            <input 
+              v-model="editForm.name" 
+              type="text" 
+              class="form-control"
+            >
           </div>
-          <div class="modal-body">
-            <form @submit.prevent="updateUserInfo">
-              <div class="mb-3">
-                <label class="form-label">이름</label>
-                <input 
-                  v-model="editForm.name" 
-                  type="text" 
-                  class="form-control" 
-                  required
-                >
-              </div>
-              <div class="mb-3">
-                <label class="form-label">이메일</label>
-                <input 
-                  v-model="editForm.email" 
-                  type="email" 
-                  class="form-control" 
-                  required
-                >
-              </div>
-              <button type="submit" class="btn btn-primary w-100">
-                저장
-              </button>
-            </form>
+          <div class="mb-3">
+            <label class="form-label">이메일</label>
+            <input 
+              v-model="editForm.email" 
+              type="email" 
+              class="form-control"
+            >
           </div>
+        </div>
+        <div class="modal-footer">
+          <button @click="showEditModal = false" class="btn btn-secondary">
+            취소
+          </button>
+          <button @click="saveProfile" class="btn btn-primary">
+            저장
+          </button>
         </div>
       </div>
     </div>
@@ -109,11 +143,17 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
+import { useNotificationStore } from '@/stores/notification'
+
+const notificationStore = useNotificationStore()
 
 const user = ref(null)
 const surveyResult = ref(null)
 const profileType = ref('')
+const profileDescription = ref('')
 const myReviews = ref([])
+const notifications = ref([])
 const showEditModal = ref(false)
 const editForm = ref({
   name: '',
@@ -121,91 +161,177 @@ const editForm = ref({
 })
 
 const loadUserData = () => {
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null')
-  
-  if (!currentUser) {
-    console.error('로그인 정보가 없습니다.')
-    return
-  }
-  
-  user.value = currentUser
-  
-  editForm.value.name = currentUser.name || ''
-  editForm.value.email = currentUser.email || ''
-
-  const result = JSON.parse(localStorage.getItem('surveyResult_' + currentUser.id) || 'null')
-  if (result) {
-    surveyResult.value = result
-    const flexibleCount = result.answers?.filter(a => a === 'flexible').length || 0
-    if (flexibleCount >= 2) {
-      profileType.value = '자율형 인재'
-    } else {
-      profileType.value = '안정형 인재'
+  try {
+    console.log('[MyPage] Loading user data...')
+    
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+    if (!currentUser) {
+      console.log('[MyPage] No user found')
+      return
     }
-  }
+    
+    console.log('[MyPage] Current user:', currentUser)
+    user.value = currentUser
+    
+    editForm.value.name = currentUser.name || ''
+    editForm.value.email = currentUser.email || ''
 
-  const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]')
-  myReviews.value = allReviews.filter(r => r.userId === currentUser.id)
+    // ===== 수정된 부분 시작 =====
+    const resultKey = 'surveyResult_' + currentUser.id
+    console.log('[MyPage] Looking for survey result:', resultKey)
+    
+    const result = JSON.parse(localStorage.getItem(resultKey) || 'null')
+    
+    if (result) {
+      console.log('[MyPage] Survey result found:', result)
+      surveyResult.value = result
+      
+      // 새로운 50문항 설문 형식 (typeScores 있음)
+      if (result.typeScores) {
+        console.log('[MyPage] 50문항 설문 결과 감지')
+        
+        // 가장 높은 점수의 유형 찾기
+        const sorted = Object.entries(result.typeScores)
+          .sort(([, a], [, b]) => b - a)
+        
+        console.log('[MyPage] Type scores sorted:', sorted)
+        
+        if (sorted.length > 0) {
+          profileType.value = sorted[0][0] + '형'
+          
+          // 유형별 간단한 설명
+          const descriptions = {
+            '수호자': '안정과 책임을 중시하는 성향',
+            '개척자': '도전과 성취를 추구하는 성향',
+            '조율자': '체계와 효율을 중시하는 성향',
+            '중재자': '협력과 소통을 중시하는 성향',
+            '연구자': '전문성과 분석을 중시하는 성향',
+            '기술자': '완성도와 품질을 추구하는 성향',
+            '혁신가': '창의와 변화를 추구하는 성향',
+            '공감자': '공감과 배려를 중시하는 성향'
+          }
+          
+          profileDescription.value = descriptions[sorted[0][0]] || ''
+          console.log('[MyPage] Profile type:', profileType.value)
+        }
+      }
+      // 기존 3문항 설문 형식 (answers가 배열)
+      else if (Array.isArray(result.answers)) {
+        console.log('[MyPage] 기존 3문항 설문 결과 감지')
+        const flexibleCount = result.answers.filter(a => a === 'flexible').length || 0
+        if (flexibleCount >= 2) {
+          profileType.value = '자율형 인재'
+          profileDescription.value = '유연하고 자율적인 업무 환경을 선호'
+        } else {
+          profileType.value = '안정형 인재'
+          profileDescription.value = '체계적이고 안정적인 업무 환경을 선호'
+        }
+        console.log('[MyPage] Profile type:', profileType.value)
+      }
+      // answers가 객체인 경우 (50문항인데 typeScores가 없는 경우)
+      else if (result.answers && typeof result.answers === 'object') {
+        console.log('[MyPage] 50문항 설문 (typeScores 없음)')
+        profileType.value = '설문 완료'
+        profileDescription.value = '결과 다시 보기를 클릭하세요'
+      }
+    } else {
+      console.log('[MyPage] No survey result found')
+    }
+    // ===== 수정된 부분 끝 =====
+
+    // 리뷰 로드
+    const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]')
+    myReviews.value = allReviews.filter(r => r.userId === currentUser.id)
+    console.log('[MyPage] My reviews:', myReviews.value.length)
+
+    // 알림 로드
+    notifications.value = notificationStore.notifications.slice(0, 5)
+    console.log('[MyPage] Notifications:', notifications.value.length)
+    
+  } catch (error) {
+    console.error('[MyPage] Error loading user data:', error)
+  }
 }
 
-const updateUserInfo = () => {
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null')
-  
-  if (!currentUser || !currentUser.id) {
-    alert('로그인 정보가 없습니다.')
-    return
+const saveProfile = () => {
+  try {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+    currentUser.name = editForm.value.name
+    currentUser.email = editForm.value.email
+    localStorage.setItem('currentUser', JSON.stringify(currentUser))
+    
+    user.value = currentUser
+    showEditModal.value = false
+    
+    alert('정보가 수정되었습니다.')
+  } catch (error) {
+    console.error('[MyPage] Error saving profile:', error)
+    alert('정보 수정에 실패했습니다.')
   }
-  
-  // users 배열 업데이트
-  const users = JSON.parse(localStorage.getItem('users') || '[]')
-  const userIndex = users.findIndex(u => u.id === currentUser.id)
-  
-  if (userIndex !== -1) {
-    users[userIndex].name = editForm.value.name
-    users[userIndex].email = editForm.value.email
-    localStorage.setItem('users', JSON.stringify(users))
-  }
-  
-  // currentUser 업데이트
-  const updatedUser = {
-    ...currentUser,
-    name: editForm.value.name,
-    email: editForm.value.email
-  }
-  
-  user.value = updatedUser
-  localStorage.setItem('currentUser', JSON.stringify(updatedUser))
-  
-  showEditModal.value = false
-  alert('정보가 수정되었습니다.')
 }
 
 onMounted(() => {
+  console.log('[MyPage] Component mounted')
   loadUserData()
 })
 </script>
 
 <style scoped>
-.avatar-circle {
-  width: 100px;
-  height: 100px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
-  color: white;
-  font-weight: bold;
+.mypage-view {
+  min-height: 80vh;
 }
 
-.modal-overlay {
+.avatar-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 auto;
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+}
+
+.card-header {
+  background: white !important;
+  border-bottom: 2px solid #f0f0f0;
+  padding: 16px 20px;
+}
+
+.notification-item {
+  padding: 12px;
+  border-left: 3px solid #e0e0e0;
+  margin-bottom: 12px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.notification-item:hover {
+  background: #f5f5f5;
+}
+
+.notification-item.unread {
+  border-left-color: #4caf50;
+  background: #f1f8f4;
+  font-weight: 500;
+}
+
+.modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -214,23 +340,79 @@ onMounted(() => {
 
 .modal-content {
   background: white;
-  padding: 2rem;
-  border-radius: 10px;
+  border-radius: 12px;
   width: 90%;
   max-width: 500px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+}
+
+.modal-header h5 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .btn-close {
-  border: none;
   background: none;
-  font-size: 1.5rem;
+  border: none;
+  font-size: 28px;
   cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  background: #f0f0f0;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.border-bottom:last-child {
+  border-bottom: none !important;
 }
 </style>
