@@ -46,7 +46,7 @@
         </div>
 
         <div class="col-md-8">
-          <div class="card shadow mb-3">
+          <div class="card shadow">
             <div class="card-header bg-white">
               <h5 class="mb-0">작성한 리뷰</h5>
             </div>
@@ -74,28 +74,6 @@
                 <RouterLink to="/companies" class="btn btn-primary btn-sm">
                   기업 둘러보기
                 </RouterLink>
-              </div>
-            </div>
-          </div>
-
-          <div class="card shadow">
-            <div class="card-header bg-white">
-              <h5 class="mb-0">알림</h5>
-            </div>
-            <div class="card-body">
-              <div v-if="notifications.length > 0">
-                <div 
-                  v-for="notif in notifications" 
-                  :key="notif.id"
-                  class="notification-item"
-                  :class="{ unread: !notif.is_read }"
-                >
-                  <p class="mb-1">{{ notif.message }}</p>
-                  <small class="text-muted">{{ notif.created_at }}</small>
-                </div>
-              </div>
-              <div v-else class="text-center text-muted py-4">
-                <p>새로운 알림이 없습니다.</p>
               </div>
             </div>
           </div>
@@ -144,16 +122,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useNotificationStore } from '@/stores/notification'
-
-const notificationStore = useNotificationStore()
 
 const user = ref(null)
 const surveyResult = ref(null)
 const profileType = ref('')
 const profileDescription = ref('')
 const myReviews = ref([])
-const notifications = ref([])
 const showEditModal = ref(false)
 const editForm = ref({
   name: '',
@@ -176,7 +150,7 @@ const loadUserData = () => {
     editForm.value.name = currentUser.name || ''
     editForm.value.email = currentUser.email || ''
 
-    // ===== 수정된 부분 시작 =====
+    // 설문 결과 로드
     const resultKey = 'surveyResult_' + currentUser.id
     console.log('[MyPage] Looking for survey result:', resultKey)
     
@@ -237,16 +211,11 @@ const loadUserData = () => {
     } else {
       console.log('[MyPage] No survey result found')
     }
-    // ===== 수정된 부분 끝 =====
 
     // 리뷰 로드
     const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]')
     myReviews.value = allReviews.filter(r => r.userId === currentUser.id)
     console.log('[MyPage] My reviews:', myReviews.value.length)
-
-    // 알림 로드
-    notifications.value = notificationStore.notifications.slice(0, 5)
-    console.log('[MyPage] Notifications:', notifications.value.length)
     
   } catch (error) {
     console.error('[MyPage] Error loading user data:', error)
@@ -304,25 +273,6 @@ onMounted(() => {
   background: white !important;
   border-bottom: 2px solid #f0f0f0;
   padding: 16px 20px;
-}
-
-.notification-item {
-  padding: 12px;
-  border-left: 3px solid #e0e0e0;
-  margin-bottom: 12px;
-  background: #f9f9f9;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.notification-item:hover {
-  background: #f5f5f5;
-}
-
-.notification-item.unread {
-  border-left-color: #4caf50;
-  background: #f1f8f4;
-  font-weight: 500;
 }
 
 .modal-backdrop {
