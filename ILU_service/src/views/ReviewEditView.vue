@@ -1,9 +1,9 @@
 <template>
-  <div class="review-create-view">
+  <div class="review-edit-view">
     <div class="container my-5">
-      <h1 class="mb-4">📝 리뷰 작성</h1>
+      <h1 class="mb-4">✏️ 리뷰 수정</h1>
 
-      <div class="row">
+      <div v-if="review" class="row">
         <div class="col-md-4 mb-4">
           <div class="card shadow">
             <div class="card-body">
@@ -18,7 +18,7 @@
         <div class="col-md-8">
           <div class="card shadow">
             <div class="card-body p-4">
-              <form @submit.prevent="submitReview">
+              <form @submit.prevent="updateReview">
                 <div class="mb-3">
                   <label for="title" class="form-label">제목 *</label>
                   <input 
@@ -43,7 +43,6 @@
                   ></textarea>
                 </div>
 
-                <!-- ✅ 변경: 별점 → 점수 입력 -->
                 <div class="mb-3">
                   <label for="rating" class="form-label">평가 *</label>
                   <div class="rating-input-wrapper">
@@ -69,7 +68,7 @@
 
                 <div class="d-flex gap-2">
                   <button type="submit" class="btn btn-primary" :disabled="!!ratingError">
-                    작성하기
+                    💾 수정 완료
                   </button>
                   <button type="button" @click="goBack" class="btn btn-secondary">
                     취소
@@ -79,6 +78,11 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div v-else class="text-center py-5">
+        <p class="text-muted">리뷰를 찾을 수 없습니다.</p>
+        <RouterLink to="/reviews" class="btn btn-primary">리뷰 목록으로</RouterLink>
       </div>
     </div>
   </div>
@@ -90,13 +94,14 @@ import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
+const review = ref(null)
 const company = ref(null)
 const ratingError = ref('')
 
 const form = ref({
   title: '',
   content: '',
-  rating: 0.0  // ✅ 변경: 0 → 0.0
+  rating: 0.0
 })
 
 const mockCompanies = {
@@ -108,82 +113,116 @@ const mockCompanies = {
   '00253623': { corp_name: '카카오', industry: 'IT·소프트웨어', stock_code: '035720' }
 }
 
-// ✅ 추가: 점수 유효성 검사 함수
 const validateRating = (event) => {
   const value = parseFloat(event.target.value)
   
-  // 빈 값 체크
   if (event.target.value === '') {
     ratingError.value = '점수를 입력해주세요'
     return
   }
   
-  // 숫자 형식 체크
   if (isNaN(value)) {
     ratingError.value = '올바른 숫자를 입력해주세요'
     return
   }
   
-  // 범위 체크 (0.0 ~ 5.0)
   if (value < 0 || value > 5) {
     ratingError.value = '0.0 ~ 5.0 사이의 점수를 입력해주세요'
     return
   }
   
-  // 소수점 자리수 체크
   const decimalPart = event.target.value.split('.')[1]
   if (decimalPart && decimalPart.length > 1) {
     ratingError.value = '소수점 첫째 자리까지만 입력 가능합니다'
     return
   }
   
-  // 모든 검증 통과
   ratingError.value = ''
-  form.value.rating = Math.round(value * 10) / 10  // 소수점 첫째 자리로 반올림
+  form.value.rating = Math.round(value * 10) / 10
 }
 
-const submitReview = () => {
-  // ✅ 추가: 제출 전 최종 검증
-  if (form.value.rating < 0 || form.value.rating > 5) {
-    alert('점수는 0.0 ~ 5.0 사이여야 합니다.')
-    return
+const loadReview = () => {
+  try {
+    const reviewId = parseInt(route.params.reviewId)
+    console.log('[ReviewEdit] Loading review ID:', reviewId)
+    
+    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]')
+    review.value = reviews.find(r => r.id === reviewId)
+    
+    if (review.value) {
+      console.log('[ReviewEdit] Review found:', review.value)
+      
+      // 폼에 기존 데이터 채우기
+      form.value.title = review.value.title
+      form.value.content = review.value.content
+      form.value.rating = review.value.rating
+      
+      // 기업 정보 로드
+      company.value = mockCompanies[review.value.corpCode]
+      
+      // 작성자 확인
+      const user = JSON.parse(localStorage.getItem('currentUser'))
+      if (!user || user.id !== review.value.userId) {
+        alert('본인이 작성한 리뷰만 수정할 수 있습니다.')
+        router.push(`/reviews/${reviewId}`)
+      }
+    } else {
+      console.error('[ReviewEdit] Review not found')
+      alert('리뷰를 찾을 수 없습니다.')
+      router.push('/reviews')
+    }
+  } catch (error) {
+    console.error('[ReviewEdit] Error loading review:', error)
+    alert('리뷰를 불러오는 중 오류가 발생했습니다.')
+    router.push('/reviews')
   }
-  
-  const user = JSON.parse(localStorage.getItem('currentUser'))
-  const reviews = JSON.parse(localStorage.getItem('reviews') || '[]')
-  
-  const newReview = {
-    id: Date.now(),
-    corpCode: route.params.corpCode,
-    corpName: company.value.corp_name,
-    title: form.value.title,
-    content: form.value.content,
-    rating: Math.round(form.value.rating * 10) / 10,  // ✅ 소수점 첫째 자리로 저장
-    userId: user.id,
-    authorName: user.name,
-    createdAt: new Date().toISOString().split('T')[0],
-    likes: 0,
-    comments: []
+}
+
+const updateReview = () => {
+  try {
+    // 최종 검증
+    if (form.value.rating < 0 || form.value.rating > 5) {
+      alert('점수는 0.0 ~ 5.0 사이여야 합니다.')
+      return
+    }
+    
+    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]')
+    const reviewIndex = reviews.findIndex(r => r.id === review.value.id)
+    
+    if (reviewIndex !== -1) {
+      // 리뷰 업데이트 (기존 정보는 유지)
+      reviews[reviewIndex] = {
+        ...reviews[reviewIndex],
+        title: form.value.title,
+        content: form.value.content,
+        rating: Math.round(form.value.rating * 10) / 10,
+        updatedAt: new Date().toISOString().split('T')[0]  // 수정 날짜 추가
+      }
+      
+      localStorage.setItem('reviews', JSON.stringify(reviews))
+      
+      console.log('[ReviewEdit] Review updated:', reviews[reviewIndex])
+      alert('리뷰가 수정되었습니다.')
+      router.push(`/reviews/${review.value.id}`)
+    } else {
+      alert('리뷰를 찾을 수 없습니다.')
+      router.push('/reviews')
+    }
+  } catch (error) {
+    console.error('[ReviewEdit] Error updating review:', error)
+    alert('리뷰 수정 중 오류가 발생했습니다.')
   }
-  
-  reviews.push(newReview)
-  localStorage.setItem('reviews', JSON.stringify(reviews))
-  
-  router.push(`/reviews/${newReview.id}`)
 }
 
 const goBack = () => {
-  router.back()
+  if (confirm('수정을 취소하시겠습니까? 변경사항이 저장되지 않습니다.')) {
+    router.push(`/reviews/${review.value.id}`)
+  }
 }
 
 onMounted(() => {
-  const corpCode = route.params.corpCode
-  company.value = mockCompanies[corpCode]
-  
-  if (!company.value) {
-    alert('기업 정보를 찾을 수 없습니다.')
-    router.push('/companies')
-  }
+  console.log('[ReviewEdit] Component mounted')
+  loadReview()
 })
 </script>
 
@@ -192,7 +231,7 @@ textarea {
   resize: vertical;
 }
 
-/* ✅ 추가: 점수 입력 스타일 */
+/* 점수 입력 스타일 */
 .rating-input-wrapper {
   display: flex;
   align-items: center;
@@ -214,7 +253,7 @@ textarea {
   color: #6c757d;
 }
 
-/* 숫자 입력 필드 화살표 제거 (선택사항) */
+/* 숫자 입력 필드 화살표 제거 */
 .rating-input::-webkit-inner-spin-button,
 .rating-input::-webkit-outer-spin-button {
   -webkit-appearance: none;
