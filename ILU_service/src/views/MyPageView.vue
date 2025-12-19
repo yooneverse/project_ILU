@@ -57,16 +57,15 @@
                   :key="review.id" 
                   class="mb-3 pb-3 border-bottom"
                 >
-                  <h6>{{ review.title }}</h6>
+                  <RouterLink 
+                    :to="`/reviews/${review.id}`" 
+                    class="review-title-link"
+                  >
+                    <h5 class="review-title">{{ review.title }}</h5>
+                  </RouterLink>
                   <p class="text-muted small mb-2">
                     {{ review.corpName }} | {{ review.createdAt }}
                   </p>
-                  <RouterLink 
-                    :to="`/reviews/${review.id}`" 
-                    class="btn btn-outline-primary btn-sm"
-                  >
-                    상세보기
-                  </RouterLink>
                 </div>
               </div>
               <div v-else class="text-center text-muted py-4">
@@ -373,5 +372,24 @@ onMounted(() => {
 
 .border-bottom:last-child {
   border-bottom: none !important;
+}
+
+.review-title-link {
+  text-decoration: none;
+  display: block;
+}
+
+.review-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  transition: color 0.2s;
+}
+
+.review-title-link:hover .review-title {
+  color: #667eea;
+  text-decoration: underline;
+  cursor: pointer;
 }
 </style>
