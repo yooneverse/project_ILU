@@ -95,15 +95,14 @@
               v-model="editForm.name" 
               type="text" 
               class="form-control"
+              placeholder="이름을 입력하세요"
             >
           </div>
+          <!-- ❌ 이메일 입력 필드 제거됨 -->
           <div class="mb-3">
-            <label class="form-label">이메일</label>
-            <input 
-              v-model="editForm.email" 
-              type="email" 
-              class="form-control"
-            >
+            <label class="form-label text-muted">이메일</label>
+            <p class="form-text">{{ user?.email }}</p>
+            <small class="text-muted">이메일은 변경할 수 없습니다.</small>
           </div>
         </div>
         <div class="modal-footer">
@@ -130,8 +129,8 @@ const profileDescription = ref('')
 const myReviews = ref([])
 const showEditModal = ref(false)
 const editForm = ref({
-  name: '',
-  email: ''
+  name: ''
+  // ❌ email 필드 제거됨
 })
 
 const loadUserData = () => {
@@ -148,7 +147,7 @@ const loadUserData = () => {
     user.value = currentUser
     
     editForm.value.name = currentUser.name || ''
-    editForm.value.email = currentUser.email || ''
+    // ❌ 이메일 폼 초기화 제거됨
 
     // 설문 결과 로드
     const resultKey = 'surveyResult_' + currentUser.id
@@ -225,14 +224,17 @@ const loadUserData = () => {
 const saveProfile = () => {
   try {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+    
+    // ✅ 이름만 업데이트
     currentUser.name = editForm.value.name
-    currentUser.email = editForm.value.email
+    // ❌ 이메일 업데이트 제거됨
+    
     localStorage.setItem('currentUser', JSON.stringify(currentUser))
     
     user.value = currentUser
     showEditModal.value = false
     
-    alert('정보가 수정되었습니다.')
+    alert('이름이 수정되었습니다.')
   } catch (error) {
     console.error('[MyPage] Error saving profile:', error)
     alert('정보 수정에 실패했습니다.')
@@ -346,6 +348,13 @@ onMounted(() => {
   font-weight: 500;
   margin-bottom: 8px;
   display: block;
+}
+
+.form-text {
+  font-size: 14px;
+  color: #495057;
+  margin: 0;
+  padding: 10px 0;
 }
 
 .form-control {
