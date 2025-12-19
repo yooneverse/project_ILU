@@ -12,7 +12,7 @@
         </h1>
 
         <p class="hero-sub">
-          주어진 환경이 아닌, 일하는 방식과 ‘각’이 맞는 조직 문화를 기준으로 찾는 회사 탐색
+          주어진 환경이 아닌, 일하는 방식과 '각'이 맞는 조직 문화를 기준으로 찾는 회사 탐색
         </p>
 
         <div class="hero-cta">
@@ -24,13 +24,14 @@
             내 WORK TYPE 찾으러 가기
           </RouterLink>
 
-          <RouterLink
+          <!-- ✅ 수정: 클릭 이벤트로 변경 -->
+          <button
             v-else
-            to="/survey"
+            @click="handleWorkTypeClick"
             class="btn btn-primary"
           >
             내 WORK TYPE 다시 보기
-          </RouterLink>
+          </button>
         </div>
 
         <p class="hero-caption">
@@ -88,7 +89,7 @@
             <ul class="way-list">
               <li>스펙과 직무 중심의 일방향 추천</li>
               <li>조직문화·팀 분위기에 대한 정보 부족</li>
-              <li>입사 후에야 알게 되는 “나와 안 맞는 환경”</li>
+              <li>입사 후에야 알게 되는 "나와 안 맞는 환경"</li>
             </ul>
           </div>
 
@@ -108,13 +109,14 @@
     <section class="quote-section">
       <div class="container">
         <p class="quote-text">
-          “취업은 단지 나를 기업에 맞추는 것이 아니라,<br />
-          <span class="quote-strong">내 성향에 맞는 환경을 선택하는 과정</span>입니다.”
+          "취업은 단지 나를 기업에 맞추는 것이 아니라,<br />
+          <span class="quote-strong">내 성향에 맞는 환경을 선택하는 과정</span>입니다."
         </p>
 
-        <RouterLink to="/survey" class="btn btn-outline">
+        <!-- ✅ 수정: 무조건 설문 페이지로 이동 -->
+        <button @click="goToSurvey" class="btn btn-outline">
           WorkStyle 진단부터 다시 해보기
-        </RouterLink>
+        </button>
       </div>
     </section>
 
@@ -123,11 +125,54 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const isLoggedIn = ref(false)
+
+// ✅ 추가: WORK TYPE 버튼 클릭 핸들러
+const handleWorkTypeClick = () => {
+  try {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+    
+    if (!currentUser) {
+      console.log('[Landing] No user found, redirecting to login')
+      router.push('/login')
+      return
+    }
+    
+    // 설문 결과 확인
+    const resultKey = 'surveyResult_' + currentUser.id
+    const surveyResult = localStorage.getItem(resultKey)
+    
+    console.log('[Landing] Survey result key:', resultKey)
+    console.log('[Landing] Survey result exists:', !!surveyResult)
+    
+    if (surveyResult) {
+      // ✅ 설문 완료: 결과 페이지로 이동
+      console.log('[Landing] Survey completed, redirecting to result')
+      router.push('/result')
+    } else {
+      // ❌ 설문 미완료: 경고 메시지 + 설문 페이지로 이동
+      console.log('[Landing] Survey not completed, showing alert')
+      alert('아직 WorkStyle 진단을 완료하지 않았습니다.\n지금 바로 진단을 시작해보세요!')
+      router.push('/survey')
+    }
+  } catch (error) {
+    console.error('[Landing] Error checking survey status:', error)
+    alert('오류가 발생했습니다. 다시 시도해주세요.')
+  }
+}
+
+// ✅ 추가: 무조건 설문 페이지로 이동 (다시 진단하기)
+const goToSurvey = () => {
+  console.log('[Landing] Going to survey page')
+  router.push('/survey')
+}
 
 onMounted(() => {
   isLoggedIn.value = !!localStorage.getItem('currentUser')
+  console.log('[Landing] Logged in:', isLoggedIn.value)
 })
 </script>
 
@@ -203,17 +248,19 @@ onMounted(() => {
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   transition: all 0.15s ease;
 }
 
 .btn-primary {
   background-color: var(--ilu-primary);
   color: #096517;
+  border-color: #2e7d32;
 }
 
 .btn-primary:hover {
   background-color: #5db169;
+  border-color: #1b5e20;
 }
 
 .btn-outline {

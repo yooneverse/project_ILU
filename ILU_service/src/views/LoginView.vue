@@ -12,6 +12,7 @@
             type="text"
             placeholder="아이디를 입력하세요"
             required
+            :class="{ 'input-error': errorMessage }"
           />
         </div>
 
@@ -23,13 +24,15 @@
             type="password"
             placeholder="비밀번호를 입력하세요"
             required
+            :class="{ 'input-error': errorMessage }"
           />
         </div>
 
-        <!-- 에러 영역 (레이아웃 고정) -->
-        <p class="error-message" :class="{ visible: errorMessage }">
-          {{ errorMessage || ' ' }}
-        </p>
+        <!-- ✅ 개선: 에러 메시지를 더 눈에 띄게 표시 -->
+        <div v-if="errorMessage" class="error-box">
+          <span class="error-icon">⚠️</span>
+          <span class="error-text">{{ errorMessage }}</span>
+        </div>
 
         <button type="submit" class="login-btn">
           로그인
@@ -87,21 +90,32 @@ const handleLogin = async () => {
     const status = err.response?.status
 
     if (status === 401) {
-      errorMessage.value = '아이디 또는 비밀번호가 일치하지 않습니다.'
+      // ✅ 경고창 추가
+      alert('⚠️ 비밀번호가 일치하지 않습니다.\n다시 확인해주세요.')
+      
+      // 에러 박스도 표시
+      errorMessage.value = '❌ 비밀번호가 일치하지 않습니다. 다시 확인해주세요.'
+      console.log('[Login] Authentication failed - Invalid credentials')
       return
     }
 
     if (status === 403) {
-      errorMessage.value = '접근 권한이 없는 계정입니다.'
+      alert('⚠️ 접근 권한이 없는 계정입니다.')
+      errorMessage.value = '❌ 접근 권한이 없는 계정입니다.'
+      console.log('[Login] Access forbidden')
       return
     }
 
     if (status >= 500) {
-      errorMessage.value = '서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'
+      alert('⚠️ 서버 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.')
+      errorMessage.value = '❌ 서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'
+      console.log('[Login] Server error:', status)
       return
     }
 
-    errorMessage.value = '로그인에 실패했습니다.'
+    alert('⚠️ 로그인에 실패했습니다.\n다시 시도해주세요.')
+    errorMessage.value = '❌ 로그인에 실패했습니다. 다시 시도해주세요.'
+    console.log('[Login] Login failed:', err)
   }
 }
 
@@ -154,6 +168,7 @@ input {
   border: 1px solid #cfd8dc;
   background: #fafafa;
   box-sizing: border-box;
+  transition: all 0.2s;
 }
 
 input:focus {
@@ -162,16 +177,46 @@ input:focus {
   background: #ffffff;
 }
 
-.error-message {
-  min-height: 18px;
-  font-size: 13px;
-  color: #d32f2f;
-  margin: 6px 0 8px;
-  visibility: hidden;
+/* ✅ 추가: 에러 발생 시 입력 필드 강조 */
+input.input-error {
+  border-color: #d32f2f;
+  background: #ffebee;
 }
 
-.error-message.visible {
-  visibility: visible;
+input.input-error:focus {
+  border-color: #c62828;
+  background: #ffffff;
+}
+
+/* ✅ 개선: 에러 박스 스타일 */
+.error-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.error-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.error-text {
+  font-size: 14px;
+  color: #c62828;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .login-btn {
@@ -183,6 +228,7 @@ input:focus {
   border: none;
   font-size: 15px;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 .login-btn:hover {

@@ -1,47 +1,104 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+// ILU_service/src/router/index.js
 
-import LandingView from '@/views/LandingView.vue'
-import SurveyView from '@/views/SurveyView.vue'
-import ResultView from '@/views/ResultView.vue'
-import MyPageView from '@/views/MyPageView.vue'
-import CompaniesListView from '@/views/CompaniesListView.vue'
-import CompaniesDetailView from '@/views/CompaniesDetailView.vue'
-import ReviewsListView from '@/views/ReviewsListView.vue'
-import ReviewCreateView from '@/views/ReviewCreateView.vue'
-import ReviewDetailView from '@/views/ReviewDetailView.vue'
-import LoginView from '@/views/LoginView.vue'
-import SignupView from '@/views/SignupView.vue'
+import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', component: LandingView },
-
-    { path: '/login', component: LoginView },
-    { path: '/signup', component: SignupView },
-
-    { path: '/survey', component: SurveyView, meta: { requiresAuth: true } },
-    { path: '/result', component: ResultView, meta: { requiresAuth: true } },
-    { path: '/mypage', component: MyPageView, meta: { requiresAuth: true } },
-
-    { path: '/companies', component: CompaniesListView },
-    { path: '/companies/:corpCode', component: CompaniesDetailView },
-
-    { path: '/reviews', component: ReviewsListView },
-    { path: '/reviews/create/:corpCode', component: ReviewCreateView, meta: { requiresAuth: true } },
-    { path: '/reviews/:reviewId', component: ReviewDetailView },
-  ],
+    // 메인 페이지
+    {
+      path: '/',
+      name: 'Landing',
+      component: () => import('../views/LandingView.vue')
+    },
+    
+    // 인증
+    {
+      path: '/login',
+      name: 'Login',
+      component: () => import('../views/LoginView.vue')
+    },
+    {
+      path: '/signup',
+      name: 'Signup',
+      component: () => import('../views/SignupView.vue')
+    },
+    
+    // 설문
+    {
+      path: '/survey',
+      name: 'Survey',
+      component: () => import('../views/SurveyView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/result',
+      name: 'Result',
+      component: () => import('../views/ResultView.vue'),
+      meta: { requiresAuth: true }
+    },
+    
+    // 마이페이지
+    {
+      path: '/mypage',
+      name: 'MyPage',
+      component: () => import('../views/MyPageView.vue'),
+      meta: { requiresAuth: true }
+    },
+    
+    // 기업
+    {
+      path: '/companies',
+      name: 'CompaniesList',
+      component: () => import('../views/CompaniesListView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/companies/:corpCode',
+      name: 'CompaniesDetail',
+      component: () => import('../views/CompaniesDetailView.vue'),
+      meta: { requiresAuth: true }
+    },
+    
+    // 리뷰
+    {
+      path: '/reviews',
+      name: 'ReviewsList',
+      component: () => import('../views/ReviewsListView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/reviews/create/:corpCode',
+      name: 'ReviewCreate',
+      component: () => import('../views/ReviewCreateView.vue'),
+      meta: { requiresAuth: true }
+    },
+    // ✅ 중요: edit을 먼저 정의해야 함!
+    {
+      path: '/reviews/edit/:reviewId',
+      name: 'ReviewEdit',
+      component: () => import('../views/ReviewEditView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/reviews/:reviewId',
+      name: 'ReviewDetail',
+      component: () => import('../views/ReviewDetailView.vue'),
+      meta: { requiresAuth: true }
+    }
+  ]
 })
 
+// 인증 가드 (선택사항)
 router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-  authStore.restore()
-
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next('/login')
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const isAuthenticated = localStorage.getItem('currentUser')
+  
+  if (requiresAuth && !isAuthenticated) {
+    next('/login')
+  } else {
+    next()
   }
-  next()
 })
 
 export default router

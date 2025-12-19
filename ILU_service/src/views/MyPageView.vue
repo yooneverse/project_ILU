@@ -46,7 +46,7 @@
         </div>
 
         <div class="col-md-8">
-          <div class="card shadow mb-3">
+          <div class="card shadow">
             <div class="card-header bg-white">
               <h5 class="mb-0">작성한 리뷰</h5>
             </div>
@@ -57,16 +57,15 @@
                   :key="review.id" 
                   class="mb-3 pb-3 border-bottom"
                 >
-                  <h6>{{ review.title }}</h6>
+                  <RouterLink 
+                    :to="`/reviews/${review.id}`" 
+                    class="review-title-link"
+                  >
+                    <h5 class="review-title">{{ review.title }}</h5>
+                  </RouterLink>
                   <p class="text-muted small mb-2">
                     {{ review.corpName }} | {{ review.createdAt }}
                   </p>
-                  <RouterLink 
-                    :to="`/reviews/${review.id}`" 
-                    class="btn btn-outline-primary btn-sm"
-                  >
-                    상세보기
-                  </RouterLink>
                 </div>
               </div>
               <div v-else class="text-center text-muted py-4">
@@ -74,28 +73,6 @@
                 <RouterLink to="/companies" class="btn btn-primary btn-sm">
                   기업 둘러보기
                 </RouterLink>
-              </div>
-            </div>
-          </div>
-
-          <div class="card shadow">
-            <div class="card-header bg-white">
-              <h5 class="mb-0">알림</h5>
-            </div>
-            <div class="card-body">
-              <div v-if="notifications.length > 0">
-                <div 
-                  v-for="notif in notifications" 
-                  :key="notif.id"
-                  class="notification-item"
-                  :class="{ unread: !notif.is_read }"
-                >
-                  <p class="mb-1">{{ notif.message }}</p>
-                  <small class="text-muted">{{ notif.created_at }}</small>
-                </div>
-              </div>
-              <div v-else class="text-center text-muted py-4">
-                <p>새로운 알림이 없습니다.</p>
               </div>
             </div>
           </div>
@@ -117,15 +94,14 @@
               v-model="editForm.name" 
               type="text" 
               class="form-control"
+              placeholder="이름을 입력하세요"
             >
           </div>
+          <!-- ❌ 이메일 입력 필드 제거됨 -->
           <div class="mb-3">
-            <label class="form-label">이메일</label>
-            <input 
-              v-model="editForm.email" 
-              type="email" 
-              class="form-control"
-            >
+            <label class="form-label text-muted">이메일</label>
+            <p class="form-text">{{ user?.email }}</p>
+            <small class="text-muted">이메일은 변경할 수 없습니다.</small>
           </div>
         </div>
         <div class="modal-footer">
@@ -144,20 +120,16 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useNotificationStore } from '@/stores/notification'
-
-const notificationStore = useNotificationStore()
 
 const user = ref(null)
 const surveyResult = ref(null)
 const profileType = ref('')
 const profileDescription = ref('')
 const myReviews = ref([])
-const notifications = ref([])
 const showEditModal = ref(false)
 const editForm = ref({
-  name: '',
-  email: ''
+  name: ''
+  // ❌ email 필드 제거됨
 })
 
 const loadUserData = () => {
@@ -174,9 +146,9 @@ const loadUserData = () => {
     user.value = currentUser
     
     editForm.value.name = currentUser.name || ''
-    editForm.value.email = currentUser.email || ''
+    // ❌ 이메일 폼 초기화 제거됨
 
-    // ===== 수정된 부분 시작 =====
+    // 설문 결과 로드
     const resultKey = 'surveyResult_' + currentUser.id
     console.log('[MyPage] Looking for survey result:', resultKey)
     
@@ -237,16 +209,11 @@ const loadUserData = () => {
     } else {
       console.log('[MyPage] No survey result found')
     }
-    // ===== 수정된 부분 끝 =====
 
     // 리뷰 로드
     const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]')
     myReviews.value = allReviews.filter(r => r.userId === currentUser.id)
     console.log('[MyPage] My reviews:', myReviews.value.length)
-
-    // 알림 로드
-    notifications.value = notificationStore.notifications.slice(0, 5)
-    console.log('[MyPage] Notifications:', notifications.value.length)
     
   } catch (error) {
     console.error('[MyPage] Error loading user data:', error)
@@ -256,14 +223,17 @@ const loadUserData = () => {
 const saveProfile = () => {
   try {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+    
+    // ✅ 이름만 업데이트
     currentUser.name = editForm.value.name
-    currentUser.email = editForm.value.email
+    // ❌ 이메일 업데이트 제거됨
+    
     localStorage.setItem('currentUser', JSON.stringify(currentUser))
     
     user.value = currentUser
     showEditModal.value = false
     
-    alert('정보가 수정되었습니다.')
+    alert('이름이 수정되었습니다.')
   } catch (error) {
     console.error('[MyPage] Error saving profile:', error)
     alert('정보 수정에 실패했습니다.')
@@ -304,25 +274,6 @@ onMounted(() => {
   background: white !important;
   border-bottom: 2px solid #f0f0f0;
   padding: 16px 20px;
-}
-
-.notification-item {
-  padding: 12px;
-  border-left: 3px solid #e0e0e0;
-  margin-bottom: 12px;
-  background: #f9f9f9;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.notification-item:hover {
-  background: #f5f5f5;
-}
-
-.notification-item.unread {
-  border-left-color: #4caf50;
-  background: #f1f8f4;
-  font-weight: 500;
 }
 
 .modal-backdrop {
@@ -398,6 +349,13 @@ onMounted(() => {
   display: block;
 }
 
+.form-text {
+  font-size: 14px;
+  color: #495057;
+  margin: 0;
+  padding: 10px 0;
+}
+
 .form-control {
   width: 100%;
   padding: 10px 12px;
@@ -414,5 +372,24 @@ onMounted(() => {
 
 .border-bottom:last-child {
   border-bottom: none !important;
+}
+
+.review-title-link {
+  text-decoration: none;
+  display: block;
+}
+
+.review-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  transition: color 0.2s;
+}
+
+.review-title-link:hover .review-title {
+  color: #667eea;
+  text-decoration: underline;
+  cursor: pointer;
 }
 </style>
