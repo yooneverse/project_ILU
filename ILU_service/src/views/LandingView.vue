@@ -113,8 +113,8 @@
           <span class="quote-strong">내 성향에 맞는 환경을 선택하는 과정</span>입니다."
         </p>
 
-        <!-- ✅ 수정: 클릭 이벤트로 변경 -->
-        <button @click="handleWorkTypeClick" class="btn btn-outline">
+        <!-- ✅ 수정: 무조건 설문 페이지로 이동 -->
+        <button @click="goToSurvey" class="btn btn-outline">
           WorkStyle 진단부터 다시 해보기
         </button>
       </div>
@@ -162,6 +162,12 @@ const handleWorkTypeClick = () => {
     console.error('[Landing] Error checking survey status:', error)
     alert('오류가 발생했습니다. 다시 시도해주세요.')
   }
+}
+
+// ✅ 추가: 무조건 설문 페이지로 이동 (다시 진단하기)
+const goToSurvey = () => {
+  console.log('[Landing] Going to survey page')
+  router.push('/survey')
 }
 
 onMounted(() => {
@@ -242,17 +248,19 @@ onMounted(() => {
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   transition: all 0.15s ease;
 }
 
 .btn-primary {
   background-color: var(--ilu-primary);
   color: #096517;
+  border-color: #2e7d32;
 }
 
 .btn-primary:hover {
   background-color: #5db169;
+  border-color: #1b5e20;
 }
 
 .btn-outline {
