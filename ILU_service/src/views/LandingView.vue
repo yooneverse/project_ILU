@@ -203,13 +203,14 @@ onMounted(() => {
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   transition: all 0.15s ease;
 }
 
 .btn-primary {
   background-color: var(--ilu-primary);
   color: #096517;
+  border-color: #2e7d32;
 }
 
 .btn-primary:hover {
