@@ -72,71 +72,9 @@
               </div>
             </div>
 
-            <div class="card mb-4">
-              <div class="card-header bg-white">
-                <h4 class="mb-0">재무 정보</h4>
-              </div>
-              <div class="card-body">
-                <div class="row text-center">
-                  <div class="col-md-3">
-                    <h6 class="text-muted mb-2">매출액</h6>
-                    <h5>{{ formatCurrency(financials.revenue) }}</h5>
-                  </div>
-                  <div class="col-md-3">
-                    <h6 class="text-muted mb-2">영업이익</h6>
-                    <h5>{{ formatCurrency(financials.operating_income) }}</h5>
-                  </div>
-                  <div class="col-md-3">
-                    <h6 class="text-muted mb-2">당기순이익</h6>
-                    <h5>{{ formatCurrency(financials.net_income) }}</h5>
-                  </div>
-                  <div class="col-md-3">
-                    <h6 class="text-muted mb-2">총자산</h6>
-                    <h5>{{ formatCurrency(financials.total_assets) }}</h5>
-                  </div>
-                </div>
-                <div class="mt-4">
-                  <small class="text-muted">
-                    기준: {{ financials.base_year }}년 {{ financials.base_quarter }}
-                  </small>
-                </div>
-              </div>
-            </div>
+            <!-- ❌ 재무 정보 섹션 삭제됨 -->
 
-            <div class="card">
-              <div class="card-header bg-white">
-                <h4 class="mb-0">주요 재무비율</h4>
-              </div>
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <h6 class="text-muted">수익성</h6>
-                    <ul class="list-unstyled">
-                      <li>영업이익률: {{ formatPercent(ratios.profitability.operating_margin) }}</li>
-                      <li>순이익률: {{ formatPercent(ratios.profitability.net_margin) }}</li>
-                      <li>ROA: {{ formatPercent(ratios.profitability.roa) }}</li>
-                      <li>ROE: {{ formatPercent(ratios.profitability.roe) }}</li>
-                    </ul>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <h6 class="text-muted">안정성</h6>
-                    <ul class="list-unstyled">
-                      <li>부채비율: {{ formatPercent(ratios.stability.debt_ratio) }}</li>
-                      <li>유동비율: {{ ratios.stability.current_ratio.toFixed(2) }}</li>
-                      <li>이자보상배율: {{ ratios.stability.interest_coverage_ratio.toFixed(2) }}</li>
-                    </ul>
-                  </div>
-                  <div class="col-md-12">
-                    <h6 class="text-muted">성장성 (전년 대비)</h6>
-                    <ul class="list-unstyled">
-                      <li>매출 성장률: {{ formatPercent(ratios.growth.revenue_growth_yoy) }}</li>
-                      <li>영업이익 성장률: {{ formatPercent(ratios.growth.operating_income_growth_yoy) }}</li>
-                      <li>순이익 성장률: {{ formatPercent(ratios.growth.net_income_growth_yoy) }}</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <!-- ❌ 주요 재무비율 섹션 삭제됨 -->
           </div>
 
           <div class="col-md-4">
@@ -202,8 +140,6 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const loading = ref(true)
 const company = ref(null)
-const financials = ref({})
-const ratios = ref({})
 const culturalTraits = ref([])
 const recentReviews = ref([])
 const isLoggedIn = ref(false)
@@ -222,34 +158,6 @@ const mockCompanyData = {
   summary: '메모리, 시스템 LSI, 디스플레이 등 전자·IT 제품을 생산하는 글로벌 제조 기업'
 }
 
-const mockFinancials = {
-  base_year: 2024,
-  base_quarter: '2Q',
-  revenue: 876543210000000,
-  operating_income: 12345670000000,
-  net_income: 9876543000000,
-  total_assets: 450000000000000
-}
-
-const mockRatios = {
-  profitability: {
-    operating_margin: 0.14,
-    net_margin: 0.11,
-    roa: 0.08,
-    roe: 0.12
-  },
-  stability: {
-    debt_ratio: 0.67,
-    current_ratio: 1.85,
-    interest_coverage_ratio: 12.4
-  },
-  growth: {
-    revenue_growth_yoy: 0.07,
-    operating_income_growth_yoy: 0.10,
-    net_income_growth_yoy: 0.09
-  }
-}
-
 const mockCulturalTraits = [
   '혁신 중심',
   '글로벌 마인드',
@@ -262,24 +170,11 @@ const formatNumber = (num) => {
   return new Intl.NumberFormat('ko-KR').format(num)
 }
 
-const formatCurrency = (num) => {
-  if (num >= 1000000000000) {
-    return (num / 1000000000000).toFixed(1) + '조원'
-  }
-  return formatNumber(num) + '원'
-}
-
-const formatPercent = (num) => {
-  return (num * 100).toFixed(1) + '%'
-}
-
 onMounted(() => {
   isLoggedIn.value = !!localStorage.getItem('currentUser')
   
   setTimeout(() => {
     company.value = mockCompanyData
-    financials.value = mockFinancials
-    ratios.value = mockRatios
     culturalTraits.value = mockCulturalTraits
     
     const storedReviews = JSON.parse(localStorage.getItem('reviews') || '[]')
