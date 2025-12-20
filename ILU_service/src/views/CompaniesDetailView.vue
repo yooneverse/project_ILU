@@ -76,7 +76,7 @@
           <div class="col-md-4">
             <div class="card mb-4">
               <div class="card-header bg-white">
-                <h5 class="mb-0">조직 문화</h5>
+                <h4 class="mb-0">조직 문화</h4>
               </div>
               <div class="card-body">
                 <div v-for="trait in culturalTraits" :key="trait" class="mb-2">
@@ -87,7 +87,7 @@
 
             <div class="card">
               <div class="card-header bg-white">
-                <h5 class="mb-0">최근 리뷰</h5>
+                <h4 class="mb-0">최근 리뷰</h4>
               </div>
               <div class="card-body">
                 <div v-if="recentReviews.length > 0">
@@ -96,8 +96,8 @@
                     :key="review.id" 
                     class="mb-3 pb-3 border-bottom"
                   >
-                    <h6 class="mb-1">{{ review.title }}</h6>
-                    <p class="small text-muted mb-1">{{ review.content.substring(0, 60) }}...</p>
+                    <h5 class="review-title mb-2">{{ review.title }}</h5>
+                    <p class="text-muted mb-1" style="font-size: 0.75rem;">{{ review.content.substring(0, 60) }}...</p>
                     <RouterLink 
                       :to="`/reviews/${review.id}`" 
                       class="small text-primary"
