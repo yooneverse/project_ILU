@@ -11,6 +11,10 @@
 
         <!-- Navigation -->
         <nav class="nav-right">
+          <RouterLink to="/companies" class="nav-link">
+            기업 전체 보기
+          </RouterLink>
+          
           <RouterLink to="/" class="nav-link">
             서비스 소개
           </RouterLink>
