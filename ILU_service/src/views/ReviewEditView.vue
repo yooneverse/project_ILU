@@ -91,6 +91,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+// ✅ companyData.json import
+import companyData from '@/data/companyData.json'
 
 const route = useRoute()
 const router = useRouter()
@@ -103,15 +105,6 @@ const form = ref({
   content: '',
   rating: 0.0
 })
-
-const mockCompanies = {
-  '00126380': { corp_name: '삼성전자', industry: '전자·반도체', stock_code: '005930' },
-  '00164779': { corp_name: '현대자동차', industry: '자동차', stock_code: '005380' },
-  '00188926': { corp_name: 'SK하이닉스', industry: '전자·반도체', stock_code: '000660' },
-  '00120027': { corp_name: 'LG전자', industry: '전자·반도체', stock_code: '066570' },
-  '00168676': { corp_name: '네이버', industry: 'IT·소프트웨어', stock_code: '035420' },
-  '00253623': { corp_name: '카카오', industry: 'IT·소프트웨어', stock_code: '035720' }
-}
 
 const validateRating = (event) => {
   const value = parseFloat(event.target.value)
@@ -151,14 +144,31 @@ const loadReview = () => {
     
     if (review.value) {
       console.log('[ReviewEdit] Review found:', review.value)
+      console.log('[ReviewEdit] Corp code:', review.value.corpCode)
       
       // 폼에 기존 데이터 채우기
       form.value.title = review.value.title
       form.value.content = review.value.content
       form.value.rating = review.value.rating
       
-      // 기업 정보 로드
-      company.value = mockCompanies[review.value.corpCode]
+      // ✅ companyData.json에서 기업 정보 로드
+      const companyInfo = companyData[review.value.corpCode]
+      
+      if (companyInfo) {
+        company.value = {
+          corp_name: companyInfo.corp_name,
+          industry: companyInfo.industry,
+          stock_code: companyInfo.stock_code
+        }
+        console.log('[ReviewEdit] Company loaded:', company.value.corp_name)
+      } else {
+        console.log('[ReviewEdit] Company not found:', review.value.corpCode)
+        company.value = {
+          corp_name: review.value.corpName || '알 수 없음',
+          industry: '정보 없음',
+          stock_code: '-'
+        }
+      }
       
       // 작성자 확인
       const user = JSON.parse(localStorage.getItem('currentUser'))
@@ -222,6 +232,7 @@ const goBack = () => {
 
 onMounted(() => {
   console.log('[ReviewEdit] Component mounted')
+  console.log('[ReviewEdit] Available companies:', Object.keys(companyData).length)
   loadReview()
 })
 </script>

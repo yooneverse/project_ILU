@@ -43,7 +43,6 @@
                   ></textarea>
                 </div>
 
-                <!-- ✅ 변경: 별점 → 점수 입력 -->
                 <div class="mb-3">
                   <label for="rating" class="form-label">평가 *</label>
                   <div class="rating-input-wrapper">
@@ -87,6 +86,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+// ✅ companyData.json import
+import companyData from '@/data/companyData.json'
 
 const route = useRoute()
 const router = useRouter()
@@ -96,19 +97,10 @@ const ratingError = ref('')
 const form = ref({
   title: '',
   content: '',
-  rating: 0.0  // ✅ 변경: 0 → 0.0
+  rating: 0.0
 })
 
-const mockCompanies = {
-  '00126380': { corp_name: '삼성전자', industry: '전자·반도체', stock_code: '005930' },
-  '00164779': { corp_name: '현대자동차', industry: '자동차', stock_code: '005380' },
-  '00188926': { corp_name: 'SK하이닉스', industry: '전자·반도체', stock_code: '000660' },
-  '00120027': { corp_name: 'LG전자', industry: '전자·반도체', stock_code: '066570' },
-  '00168676': { corp_name: '네이버', industry: 'IT·소프트웨어', stock_code: '035420' },
-  '00253623': { corp_name: '카카오', industry: 'IT·소프트웨어', stock_code: '035720' }
-}
-
-// ✅ 추가: 점수 유효성 검사 함수
+// ✅ 점수 유효성 검사 함수
 const validateRating = (event) => {
   const value = parseFloat(event.target.value)
   
@@ -143,7 +135,7 @@ const validateRating = (event) => {
 }
 
 const submitReview = () => {
-  // ✅ 추가: 제출 전 최종 검증
+  // 제출 전 최종 검증
   if (form.value.rating < 0 || form.value.rating > 5) {
     alert('점수는 0.0 ~ 5.0 사이여야 합니다.')
     return
@@ -158,7 +150,7 @@ const submitReview = () => {
     corpName: company.value.corp_name,
     title: form.value.title,
     content: form.value.content,
-    rating: Math.round(form.value.rating * 10) / 10,  // ✅ 소수점 첫째 자리로 저장
+    rating: Math.round(form.value.rating * 10) / 10,
     userId: user.id,
     authorName: user.name,
     createdAt: new Date().toISOString().split('T')[0],
@@ -169,6 +161,8 @@ const submitReview = () => {
   reviews.push(newReview)
   localStorage.setItem('reviews', JSON.stringify(reviews))
   
+  console.log('[ReviewCreate] Review created:', newReview)
+  
   router.push(`/reviews/${newReview.id}`)
 }
 
@@ -178,9 +172,21 @@ const goBack = () => {
 
 onMounted(() => {
   const corpCode = route.params.corpCode
-  company.value = mockCompanies[corpCode]
+  console.log('[ReviewCreate] Loading company:', corpCode)
+  console.log('[ReviewCreate] Available companies:', Object.keys(companyData).length)
   
-  if (!company.value) {
+  // ✅ companyData.json에서 기업 정보 조회
+  const companyInfo = companyData[corpCode]
+  
+  if (companyInfo) {
+    company.value = {
+      corp_name: companyInfo.corp_name,
+      industry: companyInfo.industry,
+      stock_code: companyInfo.stock_code
+    }
+    console.log('[ReviewCreate] Company loaded:', company.value.corp_name)
+  } else {
+    console.log('[ReviewCreate] Company not found:', corpCode)
     alert('기업 정보를 찾을 수 없습니다.')
     router.push('/companies')
   }
@@ -192,7 +198,6 @@ textarea {
   resize: vertical;
 }
 
-/* ✅ 추가: 점수 입력 스타일 */
 .rating-input-wrapper {
   display: flex;
   align-items: center;
@@ -214,7 +219,7 @@ textarea {
   color: #6c757d;
 }
 
-/* 숫자 입력 필드 화살표 제거 (선택사항) */
+/* 숫자 입력 필드 화살표 제거 */
 .rating-input::-webkit-inner-spin-button,
 .rating-input::-webkit-outer-spin-button {
   -webkit-appearance: none;

@@ -71,10 +71,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- ❌ 재무 정보 섹션 삭제됨 -->
-
-            <!-- ❌ 주요 재무비율 섹션 삭제됨 -->
           </div>
 
           <div class="col-md-4">
@@ -136,6 +132,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import companiesData from '@/data/companyData.json'
 
 const route = useRoute()
 const loading = ref(true)
@@ -143,28 +140,6 @@ const company = ref(null)
 const culturalTraits = ref([])
 const recentReviews = ref([])
 const isLoggedIn = ref(false)
-
-const mockCompanyData = {
-  corp_code: '00126380',
-  corp_name: '삼성전자',
-  stock_code: '005930',
-  ceo: '한종희 외 1인',
-  industry: '반도체 제조업',
-  established_date: '1969-01-13',
-  headquarters: '경기도 수원시 영통구',
-  homepage: 'https://www.samsung.com',
-  employees: 124567,
-  listed: true,
-  summary: '메모리, 시스템 LSI, 디스플레이 등 전자·IT 제품을 생산하는 글로벌 제조 기업'
-}
-
-const mockCulturalTraits = [
-  '혁신 중심',
-  '글로벌 마인드',
-  '수평적 소통',
-  '성과 지향',
-  '빠른 실행력'
-]
 
 const formatNumber = (num) => {
   return new Intl.NumberFormat('ko-KR').format(num)
@@ -174,17 +149,34 @@ onMounted(() => {
   isLoggedIn.value = !!localStorage.getItem('currentUser')
   
   setTimeout(() => {
-    company.value = mockCompanyData
-    culturalTraits.value = mockCulturalTraits
+    // ✅ URL 파라미터에서 corp_code 가져오기
+    const corpCode = route.params.corpCode
+    console.log('[CompanyDetail] Loading company:', corpCode)
+    console.log('[CompanyDetail] Available companies:', Object.keys(companiesData).length)
     
+    // ✅ JSON에서 해당 기업 데이터 조회
+    const companyData = companiesData[corpCode]
+    
+    if (companyData) {
+      company.value = companyData
+      culturalTraits.value = companyData.traits || []
+      console.log('[CompanyDetail] Company loaded:', companyData.corp_name)
+    } else {
+      console.log('[CompanyDetail] Company not found:', corpCode)
+      company.value = null
+    }
+    
+    // ✅ 해당 기업의 리뷰만 필터링
     const storedReviews = JSON.parse(localStorage.getItem('reviews') || '[]')
     recentReviews.value = storedReviews
-      .filter(r => r.corpCode === route.params.corpCode)
+      .filter(r => r.corpCode === corpCode)
       .slice(-3)
       .reverse()
     
+    console.log('[CompanyDetail] Reviews loaded:', recentReviews.value.length)
+    
     loading.value = false
-  }, 800)
+  }, 500)
 })
 </script>
 
