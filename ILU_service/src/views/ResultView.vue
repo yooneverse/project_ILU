@@ -82,12 +82,111 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+// ✅ companyData.json import
+import companyData from '@/data/companyData.json'
 
 const router = useRouter()
 const profileType = ref('')
 const profileDescription = ref('')
 const recommendedCompanies = ref([])
-const topTypes = ref([])  // ✅ 추가: 상위 2개 역할군
+const topTypes = ref([])
+
+// ✅ 타입에 맞는 기업 추천 함수
+const getRecommendedCompanies = (userType, limit = 3) => {
+  console.log('[Result] Finding companies for type:', userType)
+  
+  // companyData를 배열로 변환
+  const companiesArray = Object.values(companyData)
+  
+  // 해당 타입에 맞는 기업 필터링
+  const matchingCompanies = companiesArray.filter(company => 
+    company.employee_type_fit && company.employee_type_fit.includes(userType)
+  )
+  
+  console.log('[Result] Matching companies:', matchingCompanies.length)
+  
+  // 추천 기업 데이터 생성
+  const recommendations = matchingCompanies.slice(0, limit).map(company => ({
+    corp_code: company.corp_code,
+    corp_name: company.corp_name,
+    industry: company.industry,
+    traits: company.traits || [],
+    matchReason: company.type_match?.[userType]?.reason || company.summary
+  }))
+  
+  console.log('[Result] Recommendations:', recommendations)
+  
+  return recommendations
+}
+
+// ✅ 복합 타입 추천 함수 (여러 타입 고려)
+const getMultiTypeRecommendations = (types, limit = 3) => {
+  console.log('[Result] Finding companies for types:', types)
+  
+  const companiesArray = Object.values(companyData)
+  const companyScores = {}
+  
+  // 각 기업에 대해 매칭 점수 계산
+  companiesArray.forEach(company => {
+    if (!company.employee_type_fit) return
+    
+    let score = 0
+    types.forEach((type, index) => {
+      if (company.employee_type_fit.includes(type)) {
+        // 첫 번째 타입에 더 높은 가중치
+        score += (types.length - index)
+      }
+    })
+    
+    if (score > 0) {
+      companyScores[company.corp_code] = {
+        company,
+        score
+      }
+    }
+  })
+  
+  // 점수 순으로 정렬
+  const sortedCompanies = Object.values(companyScores)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+  
+  // 추천 데이터 생성
+  const recommendations = sortedCompanies.map(({ company }) => {
+    // 매칭되는 첫 번째 타입의 reason 사용
+    const matchedType = types.find(type => company.employee_type_fit.includes(type))
+    
+    return {
+      corp_code: company.corp_code,
+      corp_name: company.corp_name,
+      industry: company.industry,
+      traits: company.traits || [],
+      matchReason: company.type_match?.[matchedType]?.reason || company.summary
+    }
+  })
+  
+  console.log('[Result] Multi-type recommendations:', recommendations)
+  
+  return recommendations
+}
+
+// ✅ 3문항 설문용 기업 추천 (flexible/structured)
+const getRecommendationsByWorkStyle = (workStyle) => {
+  console.log('[Result] Finding companies for work style:', workStyle)
+  
+  const companiesArray = Object.values(companyData)
+  
+  if (workStyle === 'flexible') {
+    // 자율형: 혁신가, 개척자, 연구자 타입 선호
+    return getMultiTypeRecommendations(['혁신가', '개척자', '연구자'], 3)
+  } else if (workStyle === 'structured') {
+    // 안정형: 수호자, 조율자, 기술자 타입 선호
+    return getMultiTypeRecommendations(['수호자', '조율자', '기술자'], 3)
+  } else {
+    // 균형형: 다양한 타입
+    return getMultiTypeRecommendations(['조율자', '중재자', '연구자'], 3)
+  }
+}
 
 const analyzeResult = () => {
   const user = JSON.parse(localStorage.getItem('currentUser'))
@@ -160,81 +259,9 @@ const analyzeResult = () => {
       console.log('[Result] Profile type:', profileType.value)
     }
     
-    // 기업 추천 (조율자/중재자 타입 기준 예시)
-    if (top2[0].name === '조율자' || top2[0].name === '중재자') {
-      recommendedCompanies.value = [
-        {
-          corp_code: '00126380',
-          corp_name: '삼성전자',
-          industry: '전자·반도체',
-          traits: ['체계적 시스템', '글로벌', '복지 우수'],
-          matchReason: '명확한 프로세스와 안정적인 시스템이 있습니다.'
-        },
-        {
-          corp_code: '00164779',
-          corp_name: '현대자동차',
-          industry: '자동차',
-          traits: ['안정적', '복지 좋음', '체계적'],
-          matchReason: '체계적인 조직 문화가 당신과 잘 맞습니다.'
-        },
-        {
-          corp_code: '00120027',
-          corp_name: 'LG전자',
-          industry: '전자·반도체',
-          traits: ['안정성', '복지', '균형'],
-          matchReason: '일과 삶의 균형을 중시하는 문화입니다.'
-        }
-      ]
-    } else if (top2[0].name === '개척자' || top2[0].name === '혁신가') {
-      recommendedCompanies.value = [
-        {
-          corp_code: '00168676',
-          corp_name: '네이버',
-          industry: 'IT·소프트웨어',
-          traits: ['자율적 분위기', '수평적 소통', '혁신 중심'],
-          matchReason: '자율적인 업무 환경과 수평적 소통 문화가 잘 맞습니다.'
-        },
-        {
-          corp_code: '00253623',
-          corp_name: '카카오',
-          industry: 'IT·소프트웨어',
-          traits: ['유연한 근무', '창의적 환경', '빠른 실행'],
-          matchReason: '창의성을 중시하는 문화가 당신의 성향과 잘 맞습니다.'
-        },
-        {
-          corp_code: '00188926',
-          corp_name: 'SK하이닉스',
-          industry: '전자·반도체',
-          traits: ['혁신 추구', '글로벌', '성장 기회'],
-          matchReason: '기술 혁신을 추구하는 환경이 적합합니다.'
-        }
-      ]
-    } else {
-      // 기타 타입
-      recommendedCompanies.value = [
-        {
-          corp_code: '00126380',
-          corp_name: '삼성전자',
-          industry: '전자·반도체',
-          traits: ['글로벌', '혁신', '복지'],
-          matchReason: '다양한 기회와 안정성을 동시에 제공합니다.'
-        },
-        {
-          corp_code: '00168676',
-          corp_name: '네이버',
-          industry: 'IT·소프트웨어',
-          traits: ['혁신', '성장', '자율'],
-          matchReason: '혁신적인 환경에서 성장할 수 있습니다.'
-        },
-        {
-          corp_code: '00164779',
-          corp_name: '현대자동차',
-          industry: '자동차',
-          traits: ['안정성', '글로벌', '체계'],
-          matchReason: '체계적이면서도 글로벌한 환경입니다.'
-        }
-      ]
-    }
+    // ✅ JSON 기반 기업 추천 (상위 2개 타입 고려)
+    const userTypes = top2.map(t => t.name)
+    recommendedCompanies.value = getMultiTypeRecommendations(userTypes, 3)
   }
   // ✅ 기존 3문항 설문 결과 처리 (answers가 배열)
   else if (Array.isArray(result.answers)) {
@@ -246,83 +273,22 @@ const analyzeResult = () => {
     if (flexibleCount >= 2) {
       profileType.value = '자율형 인재'
       profileDescription.value = '자유롭고 창의적인 환경에서 최고의 성과를 내는 유형입니다.'
-      recommendedCompanies.value = [
-        {
-          corp_code: '00168676',
-          corp_name: '네이버',
-          industry: 'IT·소프트웨어',
-          traits: ['자율적 분위기', '수평적 소통', '혁신 중심'],
-          matchReason: '자율적인 업무 환경과 수평적 소통 문화가 잘 맞습니다.'
-        },
-        {
-          corp_code: '00253623',
-          corp_name: '카카오',
-          industry: 'IT·소프트웨어',
-          traits: ['유연한 근무', '창의적 환경', '빠른 실행'],
-          matchReason: '창의성을 중시하는 문화가 당신의 성향과 잘 맞습니다.'
-        },
-        {
-          corp_code: '00188926',
-          corp_name: 'SK하이닉스',
-          industry: '전자·반도체',
-          traits: ['혁신 추구', '글로벌', '성장 기회'],
-          matchReason: '기술 혁신을 추구하는 환경이 적합합니다.'
-        }
-      ]
+      // ✅ JSON 기반 추천
+      recommendedCompanies.value = getRecommendationsByWorkStyle('flexible')
     } else if (structuredCount >= 2) {
       profileType.value = '안정형 인재'
       profileDescription.value = '체계적이고 명확한 시스템 속에서 능력을 발휘하는 유형입니다.'
-      recommendedCompanies.value = [
-        {
-          corp_code: '00126380',
-          corp_name: '삼성전자',
-          industry: '전자·반도체',
-          traits: ['체계적 시스템', '글로벌', '복지 우수'],
-          matchReason: '명확한 프로세스와 안정적인 시스템이 있습니다.'
-        },
-        {
-          corp_code: '00164779',
-          corp_name: '현대자동차',
-          industry: '자동차',
-          traits: ['안정적', '복지 좋음', '체계적'],
-          matchReason: '체계적인 조직 문화가 당신과 잘 맞습니다.'
-        },
-        {
-          corp_code: '00120027',
-          corp_name: 'LG전자',
-          industry: '전자·반도체',
-          traits: ['안정성', '복지', '균형'],
-          matchReason: '일과 삶의 균형을 중시하는 문화입니다.'
-        }
-      ]
+      // ✅ JSON 기반 추천
+      recommendedCompanies.value = getRecommendationsByWorkStyle('structured')
     } else {
-      profileType.value = '도전형 인재'
-      profileDescription.value = '빠르게 변화하는 환경에서 성장하는 유형입니다.'
-      recommendedCompanies.value = [
-        {
-          corp_code: '00253623',
-          corp_name: '카카오',
-          industry: 'IT·소프트웨어',
-          traits: ['빠른 성장', '도전적', '역동적'],
-          matchReason: '빠른 변화와 도전을 즐기는 환경입니다.'
-        },
-        {
-          corp_code: '00168676',
-          corp_name: '네이버',
-          industry: 'IT·소프트웨어',
-          traits: ['혁신', '성장', '글로벌'],
-          matchReason: '새로운 도전과 기회가 많은 환경입니다.'
-        },
-        {
-          corp_code: '00188926',
-          corp_name: 'SK하이닉스',
-          industry: '전자·반도체',
-          traits: ['성과 중심', '빠른 실행', '혁신'],
-          matchReason: '성과 중심의 역동적인 문화입니다.'
-        }
-      ]
+      profileType.value = '균형형 인재'
+      profileDescription.value = '다양한 환경에서 유연하게 적응하는 유형입니다.'
+      // ✅ JSON 기반 추천
+      recommendedCompanies.value = getRecommendationsByWorkStyle('balanced')
     }
   }
+  
+  console.log('[Result] Final recommended companies:', recommendedCompanies.value)
 }
 
 onMounted(() => {
@@ -335,28 +301,25 @@ onMounted(() => {
 .profile-badge {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 3rem;
+  padding: 2rem;
   border-radius: 15px;
 }
 
-/* ✅ 추가: 역할군 표시 스타일 */
 .type-scores-section {
   margin-top: 2rem;
-  padding: 2rem 0;
-  border-top: 2px solid #e9ecef;
 }
 
 .type-card {
-  background: #f8f9fa;
-  border-radius: 12px;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
   padding: 1.5rem;
-  text-align: center;
-  transition: transform 0.2s;
+  transition: all 0.3s;
 }
 
 .type-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-color: #667eea;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
 }
 
 .type-header {
@@ -364,31 +327,37 @@ onMounted(() => {
 }
 
 .type-badge {
-  display: inline-block;
-  background: linear-gradient(135deg, #49a261 0%, #2e7d32 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 8px 20px;
+  padding: 0.5rem 1.5rem;
   border-radius: 20px;
-  font-size: 18px;
   font-weight: 600;
+  font-size: 1.1rem;
 }
 
 .type-score {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .score-number {
-  font-size: 48px;
-  font-weight: 700;
-  color: #49a261;
-  line-height: 1;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #667eea;
 }
 
 .score-label {
-  font-size: 14px;
+  font-size: 1.2rem;
   color: #6c757d;
-  margin-top: 4px;
+}
+
+.card {
+  transition: transform 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
 }
 </style>
