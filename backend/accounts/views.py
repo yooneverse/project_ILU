@@ -1,5 +1,5 @@
 # accounts/views.py
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
@@ -16,9 +16,47 @@ def me(request):
     return Response(serializer.data)
 
 
-# ✅ 추가: 회원가입 엔드포인트
+# ✅ 아이디 중복 확인 - 인증 완전 우회
+@api_view(['GET'])
+@authentication_classes([])  # 인증 클래스 비활성화
+@permission_classes([AllowAny])  # 권한 체크 비활성화
+def check_username(request, username):
+    """
+    아이디 중복 확인
+    - 존재하면 409 Conflict
+    - 존재하지 않으면 200 OK
+    """
+    print(f"[CHECK_USERNAME] Called with username: {username}")
+    
+    try:
+        # 아이디가 이미 존재하는지 확인
+        exists = User.objects.filter(username=username).exists()
+        print(f"[CHECK_USERNAME] Username exists: {exists}")
+        
+        if exists:
+            return Response(
+                {'message': '이미 사용 중인 아이디입니다.'},
+                status=status.HTTP_409_CONFLICT
+            )
+        
+        # 사용 가능한 아이디
+        return Response(
+            {'message': '사용 가능한 아이디입니다.'},
+            status=status.HTTP_200_OK
+        )
+    except Exception as e:
+        # 에러 로깅
+        print(f"[CHECK_USERNAME ERROR] {e}")
+        return Response(
+            {'message': '중복 확인 중 오류가 발생했습니다.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ✅ 회원가입 - 인증 완전 우회
 @api_view(['POST'])
-@permission_classes([AllowAny])  # 인증 불필요
+@authentication_classes([])  # 인증 클래스 비활성화
+@permission_classes([AllowAny])  # 권한 체크 비활성화
 def signup(request):
     """회원가입"""
     try:
