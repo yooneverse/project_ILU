@@ -15,15 +15,44 @@
         </div>
 
         <div class="col-md-3">
+          <!-- ✅ 실제 companyData.json의 업종에 맞게 수정 -->
           <select v-model="selectedIndustry" class="form-select">
             <option value="">전체 업종</option>
-            <option value="전자·반도체">전자·반도체</option>
-            <option value="자동차">자동차</option>
-            <option value="금융">금융</option>
-            <option value="제약·바이오">제약·바이오</option>
-            <option value="IT·소프트웨어">IT·소프트웨어</option>
-            <option value="화학">화학</option>
-            <option value="유통">유통</option>
+            
+            <optgroup label="제조업">
+              <option value="제조/전자">전자</option>
+              <option value="제조/반도체">반도체</option>
+              <option value="제조/2차전지">2차전지</option>
+              <option value="제조/2차전지소재">2차전지소재</option>
+              <option value="제조/자동차">자동차</option>
+              <option value="제조/자동차부품">자동차부품</option>
+              <option value="제조/화학">화학</option>
+              <option value="제조/바이오">바이오</option>
+              <option value="제조/조선">조선</option>
+              <option value="제조/중전기기">중전기기</option>
+              <option value="제조/발전설비">발전설비</option>
+              <option value="제조/비철금속">비철금속</option>
+              <option value="제조/방위산업">방위산업</option>
+              <option value="제조/담배">담배</option>
+            </optgroup>
+            
+            <optgroup label="금융업">
+              <option value="금융/은행">은행</option>
+              <option value="금융/보험">보험</option>
+              <option value="금융/손해보험">손해보험</option>
+            </optgroup>
+            
+            <optgroup label="IT/서비스">
+              <option value="IT/인터넷">IT/인터넷</option>
+              <option value="엔터테인먼트/콘텐츠">엔터테인먼트/콘텐츠</option>
+            </optgroup>
+            
+            <optgroup label="기타">
+              <option value="건설/종합상사">건설/종합상사</option>
+              <option value="물류/해운">물류/해운</option>
+              <option value="공기업/전력">공기업/전력</option>
+              <option value="지주/투자">지주/투자</option>
+            </optgroup>
           </select>
         </div>
 
@@ -127,7 +156,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import companiesData from '@/data/companyData.json' // ✅ 실제 경로: src/data/companyData.json
+import companiesData from '@/data/companyData.json'
 
 const searchKeyword = ref('')
 const selectedIndustry = ref('')
@@ -141,7 +170,7 @@ const totalPages = ref(1)
 
 const isLoggedIn = ref(false)
 
-// ✅ JSON이 "corp_code를 key로 갖는 객체(Object)" 형태이므로 배열로 변환해서 사용
+// JSON이 "corp_code를 key로 갖는 객체(Object)" 형태이므로 배열로 변환해서 사용
 const allCompanies = computed(() => {
   try {
     return Object.values(companiesData || {})
@@ -150,7 +179,7 @@ const allCompanies = computed(() => {
   }
 })
 
-// ✅ 페이지네이션: 현재 페이지에 표시할 데이터만 slice
+// 페이지네이션: 현재 페이지에 표시할 데이터만 slice
 const displayedCompanies = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
@@ -177,7 +206,7 @@ const searchCompanies = () => {
       })
     }
 
-    // 2) 업종 필터
+    // 2) 업종 필터 (정확한 매칭)
     if (selectedIndustry.value) {
       filtered = filtered.filter((c) => c.industry === selectedIndustry.value)
     }
@@ -220,5 +249,16 @@ onMounted(() => {
 
 .pagination .page-link {
   cursor: pointer;
+}
+
+/* ✅ optgroup 스타일링 */
+.form-select optgroup {
+  font-weight: 600;
+  color: #0d6efd;
+  background-color: #f8f9fa;
+}
+
+.form-select option {
+  padding: 8px 12px;
 }
 </style>
