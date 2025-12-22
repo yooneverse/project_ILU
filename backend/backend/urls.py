@@ -5,6 +5,9 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+# ✅ surveys views import
+from surveys import views as survey_views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     
@@ -16,4 +19,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('notifications/', include('notifications.urls')),
     path('api/v1/users/', include('users.urls')),
+    
+    # ✅ 그라데이션 생성 API
+    path('api/surveys/generate-gradient/', survey_views.generate_gradient, name='generate-gradient'),
 ]

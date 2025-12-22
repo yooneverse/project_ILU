@@ -115,7 +115,7 @@ const recommendedCompanies = ref([])
 const topTypes = ref([])
 const gradientColor = ref('linear-gradient(135deg, #667eea 0%, #764ba2 100%)')
 
-// ✅ ChatGPT API 키 (환경 변수로 관리 권장)
+// ✅ SSAFY GMS API 키 (환경 변수로 관리 권장)
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || ''
 
 // ✅ 성향별 카드 이미지 매핑 (public 폴더)
@@ -135,51 +135,52 @@ const getCardImage = (typeName) => {
   return cardImages[typeName] || '/cards/default.png'
 }
 
-// ✅ ChatGPT API로 그라데이션 색상 생성
+
+// ✅ Backend API를 통한 그라데이션 생성 (CORS 문제 해결!)
 const generateGradientColor = async (typeName, score) => {
-  if (!OPENAI_API_KEY) {
-    console.warn('[Result] OpenAI API key not found, using default colors')
-    return getDefaultGradient(typeName)
-  }
+  console.log(`[Result] Generating gradient for ${typeName} (score: ${score})`)
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // ✅ Backend API 호출 (GMS를 Backend에서 호출)
+    const response = await fetch('http://127.0.0.1:8000/api/surveys/generate-gradient/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a color expert. Generate beautiful gradient colors based on personality types and scores.'
-          },
-          {
-            role: 'user',
-            content: `Generate a CSS linear-gradient for personality type "${typeName}" with score ${score}/50. 
-            The gradient should reflect the intensity (score) and characteristics of this personality type.
-            Higher scores should have more vibrant colors.
-            Return ONLY the CSS gradient string, e.g., "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"`
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 100
+        typeName: typeName,
+        score: score
       })
     })
 
+    console.log('[Result] Backend API Response status:', response.status)
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      console.error('[Result] Backend API Error:', errorData)
+      return getDefaultGradient(typeName)
+    }
+
     const data = await response.json()
+    console.log('[Result] Backend API Response data:', data)
     
-    if (data.choices && data.choices[0]?.message?.content) {
-      const gradient = data.choices[0].message.content.trim()
-      console.log('[Result] Generated gradient:', gradient)
-      return gradient
+    if (data.gradient) {
+      const gradient = data.gradient.trim()
+      console.log('[Result] ✅ Generated gradient:', gradient)
+      
+      // ✅ gradient 형식 검증
+      if (gradient.includes('linear-gradient')) {
+        return gradient
+      } else {
+        console.warn('[Result] Invalid gradient format, using default')
+        return getDefaultGradient(typeName)
+      }
     }
     
+    console.warn('[Result] No gradient in response, using default')
     return getDefaultGradient(typeName)
   } catch (error) {
-    console.error('[Result] ChatGPT API error:', error)
+    console.error('[Result] ❌ Backend API error:', error)
     return getDefaultGradient(typeName)
   }
 }
@@ -339,10 +340,17 @@ const analyzeResult = async () => {
     }
     
     // ✅ ChatGPT API로 그라데이션 생성
+    console.log('[Result] Starting gradient generation for top 2 types...')
+    
     const typesWithColors = await Promise.all(
       top2.map(async (type, index) => {
+        console.log(`[Result] Processing type ${index + 1}:`, type.name, 'Score:', type.score)
+        
         const gradient = await generateGradientColor(type.name, type.score)
         const solidColor = getSolidColor(type.name)
+        
+        console.log(`[Result] Type ${index + 1} gradient:`, gradient)
+        console.log(`[Result] Type ${index + 1} solid color:`, solidColor)
         
         return {
           name: type.name + '형',
@@ -357,7 +365,7 @@ const analyzeResult = async () => {
     
     topTypes.value = typesWithColors
     
-    console.log('[Result] Top types with colors:', topTypes.value)
+    console.log('[Result] ✅ Final top types with colors:', topTypes.value)
     
     if (top2.length > 0) {
       profileType.value = top2[0].name + '형'
@@ -411,6 +419,11 @@ const analyzeResult = async () => {
 
 onMounted(() => {
   console.log('[Result] Component mounted')
+  console.log('[Result] Environment check:')
+  console.log('  - VITE_OPENAI_API_KEY (GMS KEY) exists:', !!import.meta.env.VITE_OPENAI_API_KEY)
+  console.log('  - GMS API Key preview:', import.meta.env.VITE_OPENAI_API_KEY ? 
+    `${import.meta.env.VITE_OPENAI_API_KEY.substring(0, 10)}...` : 'NOT FOUND')
+  
   analyzeResult()
 })
 </script>
