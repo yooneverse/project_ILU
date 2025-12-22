@@ -5,9 +5,16 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // 메인 페이지
+    // ✅ Preview 페이지 (첫 화면)
     {
       path: '/',
+      name: 'Preview',
+      component: () => import('../views/PreviewView.vue')
+    },
+    
+    // 메인 페이지 (Landing)
+    {
+      path: '/landing',
       name: 'Landing',
       component: () => import('../views/LandingView.vue')
     },
