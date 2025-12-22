@@ -217,11 +217,13 @@ onMounted(() => {
   overflow-x: hidden;
 }
 
+/* ✅ 청록색 컬러 팔레트 */
 :root {
-  --ilu-green: hwb(184 35% 27%);
-  --ilu-light: #f5f7f6;
-  --text-dark: #1d1d1f;
-  --text-grey: #86868b;
+  --ilu-teal: #5BBDC3;        /* 메인 청록색 */
+  --ilu-teal-dark: #4A9CA1;   /* 진한 청록색 */
+  --ilu-light: #E8F7F8;       /* 연한 청록 배경 */
+  --text-dark: #1d1d1f;       /* 어두운 텍스트 */
+  --text-grey: #86868b;       /* 회색 텍스트 */
 }
 
 section {
@@ -244,7 +246,7 @@ section {
 .hero h1 {
   font-size: clamp(60px, 10vw, 120px);
   font-weight: 700;
-  color: var(--ilu-green);
+  color: #5BBDC3;
   margin: 0;
   letter-spacing: -3px;
 }
@@ -266,7 +268,7 @@ section {
 
 /* Insight Message */
 .insight {
-  background-color: var(--ilu-green);
+  background-color: #5BBDC3;
   color: #fff;
 }
 
@@ -279,6 +281,7 @@ section {
 
 .insight h2 span {
   color: #28697c;
+  font-weight: 700;
 }
 
 /* Demo Showcase */
@@ -289,7 +292,7 @@ section {
 .demo-section h2 {
   font-size: 48px;
   margin-bottom: 60px;
-  color: var(--ilu-green);
+  color: #5BBDC3;
 }
 
 .demo-grid {
@@ -312,11 +315,11 @@ section {
 
 .demo-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px rgba(91, 189, 195, 0.15);
 }
 
 .demo-card h3 {
-  color: var(--ilu-green);
+  color: #5BBDC3;
   font-size: 28px;
   margin-bottom: 20px;
 }
@@ -346,12 +349,13 @@ section {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--text-grey);
+  color: #5BBDC3;
   gap: 20px;
 }
 
 .mockup-placeholder svg {
   opacity: 0.3;
+  stroke-width: 2;
 }
 
 .mockup-placeholder p {
@@ -370,7 +374,7 @@ section {
 .archive-section h2 {
   font-size: 48px;
   margin-bottom: 80px;
-  color: var(--ilu-green);
+  color: #5BBDC3;
 }
 
 .card-grid {
@@ -389,14 +393,14 @@ section {
   cursor: pointer;
   overflow: hidden;
   transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 35px rgba(91, 189, 195, 0.15);
   position: relative;
   border: 1px solid #eee;
 }
 
 .work-card:hover {
   transform: translateY(-20px) scale(1.03);
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 40px 80px rgba(91, 189, 195, 0.25);
   z-index: 10;
 }
 
@@ -409,7 +413,7 @@ section {
 
 /* ✅ CTA Section (LandingView 버튼) */
 .cta-section {
-  background: linear-gradient(135deg, var(--ilu-green) 0%, #28697c 100%);
+  background: linear-gradient(135deg, var(--ilu-teal) 0%, var(--ilu-teal-dark) 100%);
   min-height: 60vh;
 }
 
@@ -421,14 +425,15 @@ section {
 .cta-content h2 {
   font-size: clamp(36px, 6vw, 64px);
   font-weight: 700;
-  color: #fff;
+  color: #5BBDC3;
   margin: 0 0 20px 0;
   letter-spacing: -2px;
+  white-space: nowrap;
 }
 
 .cta-content p {
   font-size: 22px;
-  color: rgba(255, 255, 255, 0.9);
+  color: #5BBDC3;
   margin-bottom: 50px;
   font-weight: 300;
 }
@@ -439,7 +444,7 @@ section {
   gap: 15px;
   padding: 22px 50px;
   background: #fff;
-  color: var(--ilu-green);
+  color: #1d1d1f;
   border: none;
   border-radius: 50px;
   font-size: 20px;
@@ -495,7 +500,7 @@ section {
   border-radius: 40px;
   display: flex;
   overflow: hidden;
-  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 50px 100px rgba(91, 189, 195, 0.2);
   animation: scaleIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1.2);
 }
 
@@ -530,7 +535,7 @@ section {
 
 .modal-text-side h3 {
   font-size: 42px;
-  color: var(--ilu-green);
+  color: var(--ilu-teal);
   margin: 0 0 20px 0;
 }
 
@@ -543,7 +548,7 @@ section {
 .match-button {
   margin-top: 40px;
   padding: 18px 40px;
-  background: var(--ilu-green);
+  background: var(--ilu-teal);
   color: #fff;
   border: none;
   border-radius: 15px;
@@ -554,15 +559,16 @@ section {
 }
 
 .match-button:hover {
+  background: var(--ilu-teal-dark);
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 20px rgba(91, 189, 195, 0.3);
 }
 
 .close-btn {
   position: absolute;
   top: 40px;
   right: 50px;
-  color: var(--ilu-green);
+  color: var(--ilu-teal);
   font-size: 50px;
   cursor: pointer;
   font-weight: 100;
@@ -584,7 +590,7 @@ footer {
 .team-name {
   letter-spacing: 5px;
   font-weight: 700;
-  color: var(--ilu-green);
+  color: var(--ilu-teal);
   margin: 0 0 20px 0;
   font-size: 18px;
 }
