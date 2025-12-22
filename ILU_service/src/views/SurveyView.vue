@@ -43,24 +43,7 @@
                   </button>
                 </div>
 
-                <div class="mt-4 d-flex justify-content-between">
-                  <button 
-                    v-if="currentQuestion > 0"
-                    @click="previousQuestion" 
-                    class="btn btn-secondary"
-                  >
-                    ← 이전 질문
-                  </button>
-                  <div v-else></div>
-                  
-                  <button 
-                    v-if="answers[currentQuestion]"
-                    @click="nextQuestion" 
-                    class="btn btn-primary"
-                  >
-                    다음 질문 →
-                  </button>
-                </div>
+      
               </div>
 
               <div v-else class="text-center">
@@ -127,11 +110,7 @@ const nextQuestion = () => {
   }
 }
 
-const previousQuestion = () => {
-  if (currentQuestion.value > 0) {
-    currentQuestion.value--
-  }
-}
+// ✅ previousQuestion 함수 삭제됨
 
 const completesurvey = () => {
   isComplete.value = true

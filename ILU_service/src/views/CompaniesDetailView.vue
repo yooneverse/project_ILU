@@ -96,14 +96,18 @@
                     :key="review.id" 
                     class="mb-3 pb-3 border-bottom"
                   >
-                    <h6 class="mb-1">{{ review.title }}</h6>
-                    <p class="small text-muted mb-1">{{ review.content.substring(0, 60) }}...</p>
+                    <!-- ✅ 제목을 클릭하면 리뷰 상세로 이동 -->
                     <RouterLink 
                       :to="`/reviews/${review.id}`" 
-                      class="small text-primary"
+                      class="review-title-link"
                     >
-                      자세히 보기
+                      <h5 class="review-title mb-2">{{ review.title }}</h5>
                     </RouterLink>
+                    
+                    <!-- 내용은 그대로 표시 -->
+                    <p class="review-content text-muted mb-0">{{ review.content.substring(0, 60) }}...</p>
+                    
+                    <!-- ✅ "자세히 보기" 제거 -->
                   </div>
                   <RouterLink 
                     to="/reviews" 
@@ -188,5 +192,32 @@ onMounted(() => {
 
 .card-header {
   border-bottom: 2px solid #f0f0f0;
+}
+
+/* ✅ 제목 링크 스타일 */
+.review-title-link {
+  text-decoration: none;
+  display: block;
+}
+
+/* ✅ 리뷰 제목 스타일 */
+.review-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+  transition: color 0.2s;
+}
+
+/* ✅ 제목에 마우스 올렸을 때 */
+.review-title-link:hover .review-title {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+/* 리뷰 내용 스타일 */
+.review-content {
+  font-size: 0.85rem;
+  line-height: 1.5;
 }
 </style>
