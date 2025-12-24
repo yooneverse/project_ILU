@@ -4,7 +4,7 @@
     <header class="app-header">
       <div class="container header-inner">
         <!-- Brand -->
-        <RouterLink to="/landing" class="brand">
+        <RouterLink to="/" class="brand">
           <img src="/ilu_logo.jpg" alt="ILU 로고" class="brand-logo" />
           <span class="brand-text">ILU</span>
         </RouterLink>
@@ -87,7 +87,7 @@ onMounted(() => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #FAFFFF;
+  background: #fffefb;
 }
 
 .container {
