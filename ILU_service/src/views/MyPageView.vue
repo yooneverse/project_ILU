@@ -155,7 +155,7 @@ const editForm = ref({
 // 현재 날짜
 const currentDate = computed(() => {
   const today = new Date()
-  return `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`
+  return `${today.getFullYear()}년 ${String(today.getMonth() + 1).padStart(2, '0')}월 ${String(today.getDate()).padStart(2, '0')}일`
 })
 
 // 가입 일수 계산
