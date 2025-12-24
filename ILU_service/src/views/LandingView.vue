@@ -1,18 +1,22 @@
 <template>
   <div class="page-wrapper">
+    <!-- ================= HERO ================= -->
+    <section class="hero" @mousemove="onMouseMove">
+      <!-- 커서 반응 빛 -->
+      <div class="hero-light" :style="lightStyle"></div>
 
-    <!-- Hero -->
-    <section class="hero">
+      <!-- 콘텐츠 -->
       <div class="container hero-inner">
         <div class="hero-badge">조직문화 매칭 플랫폼</div>
 
         <h1 class="hero-title">
-          나만의 조직 취향 큐레이션,
+          나만의 조직 취향 큐레이션,<br />
           <span class="hero-highlight">일루</span>로 와!
         </h1>
 
         <p class="hero-sub">
-          주어진 환경이 아닌, 조직문화와 일하는 방식의 '각'이 맞는 회사 탐색
+          주어진 환경이 아닌, 일하는 방식과 ‘각’이 맞는<br />
+          조직 문화를 기준으로 회사를 탐색합니다.
         </p>
 
         <div class="hero-cta">
@@ -34,12 +38,12 @@
         </div>
 
         <p class="hero-caption">
-          15분 정도면 나에게 맞는 조직 스타일을 확인할 수 있어요.
+          약 15분, 나에게 맞는 조직 스타일을 확인할 수 있어요.
         </p>
       </div>
     </section>
 
-    <!-- Feature -->
+    <!-- ================= FEATURE ================= -->
     <section class="feature-section">
       <div class="container">
         <h2 class="section-title">
@@ -77,312 +81,425 @@
       </div>
     </section>
 
-    <!-- WAY -->
+    <!-- ================= WAY ================= -->
     <section class="way-section">
       <div class="container">
-        <h2 class="section-title">ILU-WAY: 일루의, 일루만의 길</h2>
+        <h2 class="section-title">ILU-WAY: 일루만의 길</h2>
 
         <div class="way-grid">
           <div class="way-card danger">
             <h3 class="way-card-title">기존 채용 서비스</h3>
             <ul class="way-list">
               <li>스펙과 직무 중심의 일방향 추천</li>
-              <li>조직문화·팀 분위기에 대한 정보 부족</li>
-              <li>입사 후에야 알게 되는 "나와 안 맞는 환경"</li>
+              <li>조직문화·팀 분위기 정보 부족</li>
+              <li>입사 후에야 드러나는 불일치</li>
             </ul>
           </div>
 
           <div class="way-card safe">
             <h3 class="way-card-title">ILU NEW VIEW</h3>
             <ul class="way-list">
-              <li>WorkStyle 기반으로 일하는 방식을 먼저 이해</li>
-              <li>조직문화 적합도를 기준으로 기업을 탐색</li>
-              <li>내가 편하게 일할 수 있는 팀을 미리 가늠</li>
+              <li>WorkStyle 중심 탐색</li>
+              <li>조직문화 적합도 기반 추천</li>
+              <li>일하기 편한 팀을 사전에 파악</li>
             </ul>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Quote -->
+    <!-- ================= QUOTE ================= -->
     <section class="quote-section">
       <div class="container">
         <p class="quote-text">
           "취업은 단지 나를 기업에 맞추는 것이 아니라,<br />
-          <span class="quote-strong">내 성향에 맞는 환경을 선택해 가는 과정</span>입니다."
+          <span class="quote-strong">
+            내 성향에 맞는 환경을 선택하는 과정
+          </span>입니다."
         </p>
 
         <button @click="goToSurvey" class="btn btn-outline">
-          WorkStyle 진단부터 다시 해보기
+          WorkStyle 진단부터 시작하기
         </button>
       </div>
     </section>
-
   </div>
 </template>
 
+
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
+/* ================= ROUTER ================= */
 const router = useRouter()
+
+/* ================= LOGIN STATE ================= */
 const isLoggedIn = ref(false)
-
-const handleWorkTypeClick = () => {
-  try {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'))
-
-    if (!currentUser) {
-      router.push('/login')
-      return
-    }
-
-    const resultKey = 'surveyResult_' + currentUser.id
-    const surveyResult = localStorage.getItem(resultKey)
-
-    if (surveyResult) {
-      router.push('/result')
-    } else {
-      alert('아직 WorkStyle 진단을 완료하지 않았습니다.\n지금 바로 진단을 시작해보세요!')
-      router.push('/survey')
-    }
-  } catch {
-    alert('오류가 발생했습니다. 다시 시도해주세요.')
-  }
-}
-
-const goToSurvey = () => {
-  router.push('/survey')
-}
 
 onMounted(() => {
   isLoggedIn.value = !!localStorage.getItem('currentUser')
 })
+
+/* ================= HERO ACTION ================= */
+const handleWorkTypeClick = () => {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+
+  if (!currentUser) {
+    router.push('/login')
+    return
+  }
+
+  const resultKey = 'surveyResult_' + currentUser.id
+  const surveyResult = localStorage.getItem(resultKey)
+
+  router.push(surveyResult ? '/result' : '/survey')
+}
+
+/* ================= QUOTE BUTTON ================= */
+const goToSurvey = () => {
+  router.push('/survey')
+}
+
+/* ================= MOUSE LIGHT ================= */
+const mouseX = ref(20)
+const mouseY = ref(50)
+
+const onMouseMove = (e) => {
+  const rect = e.currentTarget.getBoundingClientRect()
+  mouseX.value = ((e.clientX - rect.left) / rect.width) * 100
+  mouseY.value = ((e.clientY - rect.top) / rect.height) * 100
+}
+
+const lightStyle = computed(() => ({
+  background: `
+    radial-gradient(
+      1200px 600px at ${mouseX.value}% ${mouseY.value}%,
+      rgba(255,255,255,0.45),
+      rgba(255,255,255,0.25) 30%,
+      rgba(255,255,255,0.12) 55%,
+      rgba(0,0,0,0.9) 75%
+    )
+  `
+}))
 </script>
 
+
 <style scoped>
-/* =====================
-   Color Variables
-===================== */
+/* ================= ROOT ================= */
 :root {
-  --ilu-primary: #49a261e0;
-  --ilu-accent: #178CA4;
+  --ink-color: #2c3e50;
 }
 
-/* =====================
-   Layout
-===================== */
+/* ================= PAGE ================= */
 .page-wrapper {
-  background: #f5f7f8;
+  background: linear-gradient(135deg, #e8e4d9 0%, #d4cfc2 100%);
+  min-height: 100vh;
 }
 
-/* =====================
-   Hero
-===================== */
+/* ================= HERO ================= */
 .hero {
-  background: #e8f5e9;
-  padding: 64px 0 56px;
-  border-bottom: 1px solid #d0e2d3;
+  position: relative;
+  height: 650px;
+  background: #0b1220;
+  overflow: hidden;
+}
+
+/* 배경 일러 */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/hero-illustration-dark.png');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.6) saturate(0.9);
+  z-index: 0;
+}
+
+/* 빛 레이어 */
+.hero-light {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+
+  background:
+    linear-gradient(90deg,
+      rgba(0, 0, 0, 0.85) 0%,
+      rgba(0, 0, 0, 0.6) 30%,
+      rgba(0, 0, 0, 0.35) 55%,
+      rgba(255, 255, 255, 0.18) 75%,
+      rgba(255, 255, 255, 0.35) 100%),
+    conic-gradient(
+      from -40deg at -10% 50%,
+      rgba(255, 255, 255, 1) 0deg,
+      rgba(255, 255, 255, 0.8) 35deg,
+      rgba(255, 255, 255, 0.45) 70deg,
+      rgba(0, 0, 0, 0) 110deg
+    );
+
+  mix-blend-mode: screen;
+}
+
+/* HERO CONTENT */
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
 }
 
 .hero-badge {
-  display: inline-block;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: #c8e6c9;
+  padding: 8px 18px;
+  background: rgba(219, 247, 225, 0.7);
+  color: #175f1d;
   font-size: 13px;
-  color: #388e3c;
-  margin-bottom: 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-weight: bold;
 }
 
 .hero-title {
-  font-size: 30px;
-  font-weight: 700;
-  margin-bottom: 10px;
-  color: #1b5e20;
+  font-size: 46px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #ffffff;
+  margin-bottom: 20px;
 }
 
 .hero-highlight {
-  color: #2e7d32;
+  color: #b7e4c7;
 }
 
 .hero-sub {
-  font-size: 14px;
-  color: #455a64;
-  margin-bottom: 28px;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 32px;
+  line-height: 1.6;
 }
 
 .hero-caption {
-  font-size: 12px;
-  color: #78909c;
-  margin-top: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
 }
 
-/* =====================
-   Buttons
-===================== */
+/* ================= BUTTON ================= */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 22px;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 16px 36px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
-  border: 2px solid transparent;
-  transition: background-color 0.15s ease,
-              transform 0.15s ease,
-              box-shadow 0.15s ease;
+  border: none;
+  transition: all 0.3s ease;
 }
 
-/* Primary */
 .btn-primary {
-  background-color: var(--ilu-primary);
-  color: #096517;
-  border-color: #2e7d32;
+  background: rgba(255, 255, 255, 0.15); /* 반투명 */
+  color: #e6f4ec;                        /* 밝은 텍스트 */
+  border: 4px solid rgba(196, 219, 66, 0.35);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
+
 
 .btn-primary:hover {
-  background-color: #5db169;
-  border-color: #1b5e20;
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
 }
 
-/* Outline */
 .btn-outline {
-  background: transparent;
-  color: var(--ilu-primary);
-  border-color: var(--ilu-primary);
+  background: #ffffff;
+  border: 2px solid #2e7d32;
+  color: #2e7d32;
 }
 
-.btn-outline:hover {
-  background-color: rgba(73, 162, 97, 0.08);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-/* =====================
-   Section Title
-===================== */
+/* ================= SECTION TITLE ================= */
 .section-title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 32px;
+  font-weight: 800;
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 60px;
+  color: var(--ink-color);
+  position: relative;
+  display: inline-block;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Georgia', serif;
 }
 
-/* =====================
-   Feature Cards
-===================== */
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    #2e7d32,
+    #2e7d32 10px,
+    transparent 10px,
+    transparent 15px
+  );
+}
+
+/* ================= FEATURE ================= */
 .feature-section {
-  padding: 40px 0;
+  padding: 80px 0;
 }
 
 .features {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 40px;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 40px;
 }
 
+/* FEATURE CARD – 노트 */
 .feature-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 28px 24px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  background: #fdfcf8;
+  padding: 40px 32px;
+  position: relative;
+  border-left: 3px solid #d4af37;
+
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 8px 16px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+
+  transform: rotate(-0.6deg);
 }
 
-.feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+.feature-card:nth-child(2) { transform: rotate(0.4deg); }
+.feature-card:nth-child(3) { transform: rotate(-0.3deg); }
+
+/* 줄무늬 */
+.feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    transparent,
+    transparent 31px,
+    rgba(46, 125, 50, 0.04) 31px,
+    rgba(46, 125, 50, 0.04) 32px
+  );
 }
 
-.feature-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--ilu-primary);
-  margin-bottom: 12px;
+/* 스프링 */
+.feature-card::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 8px;
+  width: 4px;
+  height: calc(100% - 40px);
+  background: repeating-linear-gradient(
+    transparent,
+    transparent 28px,
+    rgba(0, 0, 0, 0.12) 28px,
+    rgba(0, 0, 0, 0.12) 32px
+  );
 }
 
-.feature-title {
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-
-.feature-card:hover .feature-title {
-  color: var(--ilu-primary);
-}
-
-.feature-desc {
-  font-size: 14px;
-  color: #546e7a;
-  line-height: 1.6;
-}
-
-/* =====================
-   Way Cards
-===================== */
+/* ================= WAY ================= */
 .way-section {
-  background: #ffffff;
-  padding: 48px 0;
+  padding: 80px 0;
 }
 
 .way-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
 }
 
+/* WAY CARD – 수첩 */
 .way-card {
-  background: #f9fbfc;
-  border-radius: 16px;
-  padding: 28px 24px;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  background: #fdfcf8;
+  padding: 48px 40px;
+  position: relative;
+
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.1),
+    0 10px 20px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+
+  transform: rotate(0.6deg);
 }
 
-.way-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+.way-card:nth-child(2) { transform: rotate(-0.6deg); }
+
+/* 링 */
+.way-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 12px;
+  background:
+    radial-gradient(circle at 40px 6px, transparent 4px, #d4cfc2 4px, #d4cfc2 8px, transparent 8px),
+    radial-gradient(circle at 120px 6px, transparent 4px, #d4cfc2 4px, #d4cfc2 8px, transparent 8px),
+    radial-gradient(circle at 200px 6px, transparent 4px, #d4cfc2 4px, #d4cfc2 8px, transparent 8px);
+  background-size: 80px 12px;
+  background-repeat: repeat-x;
 }
 
-.way-card.danger {
-  border-left: 4px solid #e0e0e0;
-}
-
-.way-card.safe {
-  border-left: 6px solid var(--ilu-primary);
-}
-
-.way-card-title {
-  font-size: 18px;
-  margin-bottom: 16px;
-}
-
-.way-list {
-  font-size: 14px;
-  color: #455a64;
-  line-height: 1.8;
-  padding-left: 16px;
-}
-
-/* =====================
-   Quote
-===================== */
+/* ================= QUOTE ================= */
 .quote-section {
-  background: #f5f7f8;
-  padding: 36px 0 44px;
+  padding: 80px 0;
   text-align: center;
+  position: relative;
+}
+
+.quote-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* background: #fff9e6; */
+  z-index: 0;
 }
 
 .quote-text {
-  font-size: 16px;
-  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+  font-size: 24px;
+  font-style: italic;
+  max-width: 700px;
+  margin: 0 auto 40px;
 }
 
-.quote-strong {
-  font-weight: 700;
+.quote-section::before,
+.quote-section::after {
+  pointer-events: none;
 }
+
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .features,
+  .way-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-title {
+    font-size: 32px;
+  }
+}
+
 </style>

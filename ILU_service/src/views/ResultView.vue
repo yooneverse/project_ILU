@@ -55,45 +55,47 @@
             </div>
           </div>
 
-          <div class="card shadow mb-4">
-            <div class="card-header bg-white">
-              <h4 class="mb-0">추천 기업</h4>
-            </div>
-            <div class="card-body">
-              <div class="row g-3">
-                <div v-for="company in recommendedCompanies" :key="company.corp_code" class="col-md-4">
-                  <div class="card h-100 border">
-                    <div class="card-body">
-                      <h5 class="card-title">{{ company.corp_name }}</h5>
-                      <p class="text-muted small mb-2">{{ company.industry }}</p>
-                      <div class="mb-3">
-                        <span 
-                          v-for="trait in company.traits" 
-                          :key="trait" 
-                          class="badge bg-info text-dark me-1 mb-1"
-                        >
-                          {{ trait }}
-                        </span>
-                      </div>
-                      <p class="card-text small">{{ company.matchReason }}</p>
-                      <RouterLink 
-                        :to="`/companies/${company.corp_code}`" 
-                        class="btn btn-primary btn-sm w-100"
-                      >
-                        상세보기
-                      </RouterLink>
-                    </div>
+          <div class="recommended-section">
+            <h4 class="recommend-title">추천 기업</h4>
+            <div class="companies-grid">
+              <div v-for="company in recommendedCompanies" :key="company.corp_code" class="company-card">
+                <!-- 단어장 구멍 -->
+                <span class="punch-hole"></span>
+
+                <div class="card-body">
+                  <!-- 기업명 -->
+                  <RouterLink :to="`/companies/${company.corp_code}`" class="company-title">
+                    {{ company.corp_name }}
+                  </RouterLink>
+
+                  <!-- 태그 -->
+                  <div class="company-tags">
+                    <span class="tag category">{{ company.industry }}</span>
                   </div>
+
+                  <!-- 특성 배지 -->
+                  <div class="company-traits">
+                    <span 
+                      v-for="trait in company.traits" 
+                      :key="trait" 
+                      class="trait-badge"
+                    >
+                      {{ trait }}
+                    </span>
+                  </div>
+
+                  <!-- 매칭 이유 -->
+                  <p class="match-reason">{{ company.matchReason }}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="text-center">
-            <RouterLink to="/companies" class="btn btn-outline-primary btn-lg me-2">
+          <div class="bottom-links">
+            <RouterLink to="/companies" class="gradient-link-button">
               모든 기업 둘러보기
             </RouterLink>
-            <RouterLink to="/survey" class="btn btn-outline-secondary btn-lg">
+            <RouterLink to="/survey" class="gradient-link-button">
               다시 분석하기
             </RouterLink>
           </div>
@@ -536,4 +538,163 @@ onMounted(() => {
 .card:hover {
   transform: translateY(-5px);
 }
+
+/* ===== 추천 기업 섹션 ===== */
+.recommended-section {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 32px;
+}
+
+.recommend-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 24px;
+}
+
+.companies-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* ===== 기업 카드 (단어장 스타일) ===== */
+.company-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.company-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: #2fa19a;
+}
+
+/* 단어장 구멍 */
+.punch-hole {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.28),
+    0 1px 0 rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(47, 161, 154, 0.5);
+}
+
+/* 기업명 */
+.company-title {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #326876;
+  text-decoration: none;
+  margin-bottom: 10px;
+  transition: color 0.2s;
+}
+
+.company-title:hover {
+  color: #2fa19a;
+  text-decoration: underline;
+}
+
+/* 태그 */
+.company-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tag {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.tag.category {
+  background: #eef2f7;
+  color: #334155;
+}
+
+/* 특성 배지 */
+.company-traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.trait-badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 500;
+}
+
+/* 매칭 이유 */
+.match-reason {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* 반응형 */
+@media (max-width: 992px) {
+  .companies-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .companies-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== 하단 링크 ===== */
+.bottom-links {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 40px;
+  padding: 32px 0;
+}
+
+.gradient-link-button {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #475569;
+  text-decoration: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 0.5);
+  border: 1px solid rgba(203, 213, 225, 0.3);
+  backdrop-filter: blur(8px);
+  transition: transform 0.1s;
+}
+
+.gradient-link-button:active {
+  transform: scale(0.98);
+}
+
+
+
+
 </style>

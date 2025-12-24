@@ -137,6 +137,7 @@ const submitReview = () => {
     title: form.value.title,
     content: form.value.content,
     rating: form.value.rating,
+    userId: user.id, // ✅ userId 추가!
     authorName: user.name,
     createdAt: new Date().toISOString().split('T')[0]
   }
