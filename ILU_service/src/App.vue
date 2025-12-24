@@ -4,7 +4,7 @@
     <header class="app-header">
       <div class="container header-inner">
         <!-- Brand -->
-        <RouterLink to="/" class="brand">
+        <RouterLink to="/landing" class="brand">
           <img src="/ilu_logo.jpg" alt="ILU 로고" class="brand-logo" />
           <span class="brand-text">ILU</span>
         </RouterLink>

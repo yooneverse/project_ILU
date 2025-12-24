@@ -2,8 +2,44 @@
   <div class="page-wrapper">
     <!-- ================= HERO ================= -->
     <section class="hero" @mousemove="onMouseMove">
+      <!-- 항해 장식 요소 -->
+      <svg class="sea-decoration ship" viewBox="0 0 100 100" width="80" height="80">
+        <g opacity="0.3" fill="#8B7355">
+          <path d="M30,70 L30,40 L50,30 L70,40 L70,70 Z"/>
+          <path d="M45,35 L45,15 L50,10 L55,15 L55,35"/>
+          <rect x="25" y="70" width="50" height="8" rx="2"/>
+        </g>
+      </svg>
+
+      <svg class="sea-decoration island-1" viewBox="0 0 100 100" width="60" height="60">
+        <g opacity="0.25" fill="#8B7355">
+          <ellipse cx="50" cy="70" rx="35" ry="15"/>
+          <path d="M30,70 Q50,40 70,70"/>
+          <circle cx="50" cy="50" r="5"/>
+        </g>
+      </svg>
+
+      <svg class="sea-decoration island-2" viewBox="0 0 100 100" width="50" height="50">
+        <g opacity="0.2" fill="#8B7355">
+          <ellipse cx="50" cy="75" rx="30" ry="12"/>
+          <path d="M35,75 Q50,50 65,75"/>
+        </g>
+      </svg>
+
+      <svg class="sea-decoration compass-rose" viewBox="0 0 100 100" width="120" height="120">
+        <g opacity="0.2">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#8B7355" stroke-width="1.5"/>
+          <circle cx="50" cy="50" r="35" fill="none" stroke="#8B7355" stroke-width="1"/>
+          <polygon points="50,10 55,45 50,50 45,45" fill="#D4AF37"/>
+          <polygon points="50,90 55,55 50,50 45,55" fill="#8B7355"/>
+          <polygon points="10,50 45,55 50,50 45,45" fill="#8B7355"/>
+          <polygon points="90,50 55,55 50,50 55,45" fill="#D4AF37"/>
+          <text x="50" y="8" text-anchor="middle" font-size="8" fill="#8B7355" font-weight="bold">N</text>
+        </g>
+      </svg>
+
       <!-- 커서 반응 빛 -->
-      <div class="hero-light" :style="lightStyle"></div>
+      <div class="hero-light"></div>
 
       <!-- 콘텐츠 -->
       <div class="container hero-inner">
@@ -15,7 +51,7 @@
         </h1>
 
         <p class="hero-sub">
-          주어진 환경이 아닌, 일하는 방식과 ‘각’이 맞는<br />
+          주어진 환경이 아닌, 일하는 방식과 '각'이 맞는<br />
           조직 문화를 기준으로 회사를 탐색합니다.
         </p>
 
@@ -162,26 +198,13 @@ const goToSurvey = () => {
 }
 
 /* ================= MOUSE LIGHT ================= */
-const mouseX = ref(20)
-const mouseY = ref(50)
-
 const onMouseMove = (e) => {
   const rect = e.currentTarget.getBoundingClientRect()
-  mouseX.value = ((e.clientX - rect.left) / rect.width) * 100
-  mouseY.value = ((e.clientY - rect.top) / rect.height) * 100
+  const x = ((e.clientX - rect.left) / rect.width) * 100
+  const y = ((e.clientY - rect.top) / rect.height) * 100
+  e.currentTarget.style.setProperty('--mouse-x', x + '%')
+  e.currentTarget.style.setProperty('--mouse-y', y + '%')
 }
-
-const lightStyle = computed(() => ({
-  background: `
-    radial-gradient(
-      1200px 600px at ${mouseX.value}% ${mouseY.value}%,
-      rgba(255,255,255,0.45),
-      rgba(255,255,255,0.25) 30%,
-      rgba(255,255,255,0.12) 55%,
-      rgba(0,0,0,0.9) 75%
-    )
-  `
-}))
 </script>
 
 
@@ -200,45 +223,153 @@ const lightStyle = computed(() => ({
 /* ================= HERO ================= */
 .hero {
   position: relative;
-  height: 650px;
-  background: #0b1220;
+  min-height: 650px;
+  background: 
+    linear-gradient(135deg, 
+      rgba(245, 230, 211, 0.98) 0%,
+      rgba(235, 220, 200, 1) 50%,
+      rgba(230, 215, 195, 1) 100%
+    );
   overflow: hidden;
+  padding: 80px 20px;
+  box-shadow: inset 0 0 100px rgba(139, 115, 85, 0.1);
 }
 
-/* 배경 일러 */
-.hero-bg {
+/* 바다 패턴 배경 */
+.hero::after {
+  content: '';
   position: absolute;
   inset: 0;
-  background-image: url('/hero-illustration-dark.png');
-  background-size: cover;
-  background-position: center;
-  filter: brightness(0.6) saturate(0.9);
+  background-image: 
+    /* 파도 패턴 */
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(100, 149, 237, 0.03) 40px,
+      rgba(100, 149, 237, 0.03) 42px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 40px,
+      rgba(100, 149, 237, 0.03) 40px,
+      rgba(100, 149, 237, 0.03) 42px
+    ),
+    /* 항로선 */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 60px,
+      rgba(139, 115, 85, 0.1) 60px,
+      rgba(139, 115, 85, 0.1) 62px,
+      transparent 62px,
+      transparent 70px,
+      rgba(139, 115, 85, 0.1) 70px,
+      rgba(139, 115, 85, 0.1) 72px
+    ),
+    /* 나침반 그리드 */
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="2" fill="%238B7355" opacity="0.3"/></pattern></defs><rect width="400" height="400" fill="url(%23grid)"/><g opacity="0.15"><circle cx="200" cy="200" r="150" fill="none" stroke="%238B7355" stroke-width="1.5"/><circle cx="200" cy="200" r="120" fill="none" stroke="%238B7355" stroke-width="1"/><circle cx="200" cy="200" r="90" fill="none" stroke="%238B7355" stroke-width="0.8"/><line x1="200" y1="50" x2="200" y2="350" stroke="%238B7355" stroke-width="1"/><line x1="50" y1="200" x2="350" y2="200" stroke="%238B7355" stroke-width="1"/><line x1="94" y1="94" x2="306" y2="306" stroke="%238B7355" stroke-width="0.5"/><line x1="94" y1="306" x2="306" y2="94" stroke="%238B7355" stroke-width="0.5"/></g><text x="200" y="35" text-anchor="middle" font-size="14" fill="%238B7355" font-weight="bold" opacity="0.4">N</text><text x="200" y="380" text-anchor="middle" font-size="14" fill="%238B7355" font-weight="bold" opacity="0.4">S</text><text x="365" y="205" text-anchor="middle" font-size="14" fill="%238B7355" font-weight="bold" opacity="0.4">E</text><text x="35" y="205" text-anchor="middle" font-size="14" fill="%238B7355" font-weight="bold" opacity="0.4">W</text></svg>');
+  background-size: auto, auto, auto, 600px 600px;
+  background-position: 0 0, 0 0, 0 0, center center;
+  opacity: 0.6;
+  pointer-events: none;
   z-index: 0;
 }
 
-/* 빛 레이어 */
+/* 종이 텍스처 */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 115, 85, 0.02) 2px,
+      rgba(139, 115, 85, 0.02) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 115, 85, 0.015) 2px,
+      rgba(139, 115, 85, 0.015) 4px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 빛 레이어 - 보물지도 손전등 효과 */
 .hero-light {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  background: radial-gradient(
+    circle 500px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 250, 240, 0.5) 0%,
+    rgba(212, 175, 55, 0.25) 25%,
+    rgba(139, 115, 85, 0.15) 45%,
+    transparent 70%
+  );
+  mix-blend-mode: overlay;
+}
 
-  background:
-    linear-gradient(90deg,
-      rgba(0, 0, 0, 0.85) 0%,
-      rgba(0, 0, 0, 0.6) 30%,
-      rgba(0, 0, 0, 0.35) 55%,
-      rgba(255, 255, 255, 0.18) 75%,
-      rgba(255, 255, 255, 0.35) 100%),
-    conic-gradient(
-      from -40deg at -10% 50%,
-      rgba(255, 255, 255, 1) 0deg,
-      rgba(255, 255, 255, 0.8) 35deg,
-      rgba(255, 255, 255, 0.45) 70deg,
-      rgba(0, 0, 0, 0) 110deg
-    );
+/* 바다 장식 요소 */
+.sea-decoration {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  filter: drop-shadow(2px 2px 3px rgba(139, 115, 85, 0.2));
+}
 
-  mix-blend-mode: screen;
+.sea-decoration.ship {
+  top: 15%;
+  left: 10%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.sea-decoration.island-1 {
+  bottom: 20%;
+  right: 15%;
+  animation: float 8s ease-in-out infinite;
+  animation-delay: -2s;
+}
+
+.sea-decoration.island-2 {
+  top: 25%;
+  right: 8%;
+  animation: float 7s ease-in-out infinite;
+  animation-delay: -4s;
+}
+
+.sea-decoration.compass-rose {
+  bottom: 10%;
+  left: 8%;
+  animation: rotate-slow 60s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes rotate-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* HERO CONTENT */
@@ -254,37 +385,42 @@ const lightStyle = computed(() => ({
 }
 
 .hero-badge {
-  padding: 8px 18px;
-  background: rgba(219, 247, 225, 0.7);
-  color: #175f1d;
+  padding: 10px 20px;
+  background: rgba(212, 175, 55, 0.2);
+  color: #5A4A3A;
   font-size: 13px;
-  border-radius: 6px;
+  border-radius: 50px;
   margin-bottom: 20px;
-  font-weight: bold;
+  font-weight: 600;
+  border: 1.5px solid rgba(139, 115, 85, 0.3);
+  letter-spacing: 1px;
 }
 
 .hero-title {
   font-size: 46px;
   font-weight: 800;
   line-height: 1.3;
-  color: #ffffff;
+  color: #5A4A3A;
   margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(255, 250, 240, 0.5);
 }
 
 .hero-highlight {
-  color: #b7e4c7;
+  color: #8B7355;
+  text-shadow: 1px 1px 2px rgba(212, 175, 55, 0.3);
 }
 
 .hero-sub {
   font-size: 18px;
-  color: rgba(255, 255, 255, 0.9);
+  color: #6B5840;
   margin-bottom: 32px;
   line-height: 1.6;
 }
 
 .hero-caption {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.85);
+  color: #8B7355;
+  font-style: italic;
 }
 
 /* ================= BUTTON ================= */
@@ -302,25 +438,25 @@ const lightStyle = computed(() => ({
 }
 
 .btn-primary {
-  background: rgba(255, 255, 255, 0.15); /* 반투명 */
-  color: #e6f4ec;                        /* 밝은 텍스트 */
-  border: 4px solid rgba(196, 219, 66, 0.35);
-
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  background: rgba(139, 115, 85, 0.15);
+  color: #5A4A3A;
+  border: 2px solid rgba(139, 115, 85, 0.4);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2);
 }
 
-
 .btn-primary:hover {
+  background: rgba(139, 115, 85, 0.25);
+  border-color: rgba(139, 115, 85, 0.6);
   transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 115, 85, 0.3);
 }
 
 .btn-outline {
   background: #ffffff;
-  border: 2px solid #2e7d32;
-  color: #2e7d32;
+  border: 2px solid #5A4A3A;
+  color: #5A4A3A;
 }
 
 /* ================= SECTION TITLE ================= */
@@ -346,8 +482,8 @@ const lightStyle = computed(() => ({
   height: 2px;
   background: repeating-linear-gradient(
     90deg,
-    #2e7d32,
-    #2e7d32 10px,
+    #5A4A3A,
+    #5A4A3A 10px,
     transparent 10px,
     transparent 15px
   );
@@ -373,12 +509,10 @@ const lightStyle = computed(() => ({
   padding: 40px 32px;
   position: relative;
   border-left: 3px solid #d4af37;
-
   box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.08),
     0 8px 16px rgba(0, 0, 0, 0.12),
     inset 0 0 0 1px rgba(0, 0, 0, 0.05);
-
   transform: rotate(-0.6deg);
 }
 
@@ -414,6 +548,27 @@ const lightStyle = computed(() => ({
   );
 }
 
+.feature-label {
+  font-size: 12px;
+  color: #d4af37;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.feature-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink-color);
+  margin-bottom: 16px;
+}
+
+.feature-desc {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #555;
+}
+
 /* ================= WAY ================= */
 .way-section {
   padding: 80px 0;
@@ -433,12 +588,10 @@ const lightStyle = computed(() => ({
   background: #fdfcf8;
   padding: 48px 40px;
   position: relative;
-
   box-shadow:
     0 3px 6px rgba(0, 0, 0, 0.1),
     0 10px 20px rgba(0, 0, 0, 0.15),
     inset 0 0 0 1px rgba(0, 0, 0, 0.05);
-
   transform: rotate(0.6deg);
 }
 
@@ -460,6 +613,43 @@ const lightStyle = computed(() => ({
   background-repeat: repeat-x;
 }
 
+.way-card-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--ink-color);
+}
+
+.way-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.way-list li {
+  padding: 12px 0;
+  padding-left: 24px;
+  position: relative;
+  line-height: 1.6;
+  color: #555;
+}
+
+.way-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #d4af37;
+  font-size: 20px;
+}
+
+.way-card.danger .way-list li::before {
+  color: #c85a54;
+}
+
+.way-card.safe .way-list li::before {
+  color: #2e7d32;
+}
+
 /* ================= QUOTE ================= */
 .quote-section {
   padding: 80px 0;
@@ -471,7 +661,6 @@ const lightStyle = computed(() => ({
   content: '';
   position: absolute;
   inset: 0;
-  /* background: #fff9e6; */
   z-index: 0;
 }
 
@@ -484,11 +673,15 @@ const lightStyle = computed(() => ({
   margin: 0 auto 40px;
 }
 
+.quote-strong {
+  font-weight: 700;
+  color: #5A4A3A;
+}
+
 .quote-section::before,
 .quote-section::after {
   pointer-events: none;
 }
-
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
@@ -500,6 +693,9 @@ const lightStyle = computed(() => ({
   .hero-title {
     font-size: 32px;
   }
-}
 
+  .sea-decoration {
+    display: none;
+  }
+}
 </style>
