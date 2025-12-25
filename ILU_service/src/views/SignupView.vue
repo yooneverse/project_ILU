@@ -27,15 +27,14 @@
             </button>
           </div>
           
-          <!-- 중복 확인 결과 메시지 -->
-          <p v-if="duplicateMessage" 
-             class="duplicate-message" 
+          <!-- 중복 확인 결과 메시지 (항상 공간 차지) -->
+          <p class="duplicate-message" 
              :class="{ 
                'success': !isDuplicate && isChecked, 
                'error': isDuplicate 
              }"
           >
-            {{ duplicateMessage }}
+            {{ duplicateMessage || '&nbsp;' }}
           </p>
         </div>
 
@@ -287,10 +286,11 @@ const handleSignup = async () => {
 
 .login-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   background: #ffffff;
   border-radius: 12px;
-  padding: 32px;
+  padding: 40px 48px;
+  min-height: 700px;
   border: 1px solid #e0e3e7;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
@@ -300,11 +300,11 @@ const handleSignup = async () => {
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 20px;
-  color: #1b5e20;
+  color: rgba(0,0,0,1);
 }
 
 .form-group {
-  margin-bottom: 14px;
+  margin-bottom: 20px;
 }
 
 label {
@@ -326,7 +326,7 @@ input {
 
 input:focus {
   outline: none;
-  border-color: #2e7d32;
+  border-color: #5BBDC3;
   background: #ffffff;
 }
 
@@ -366,14 +366,17 @@ input:focus {
 /* ✅ 중복 확인 메시지 */
 .duplicate-message {
   font-size: 13px;
-  margin-top: 6px;
+  margin-top: 8px;
   margin-bottom: 0;
-  min-height: 18px;
+  min-height: 44px;
   font-weight: 500;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
 }
 
 .duplicate-message.success {
-  color: #2e7d32;
+  color: #5BBDC3;
 }
 
 .duplicate-message.error {
@@ -394,7 +397,7 @@ input:focus {
 }
 
 .success-message {
-  color: #2e7d32;
+  color: #5BBDC3;
 }
 
 .error-message.visible,
@@ -406,7 +409,7 @@ input:focus {
   width: 100%;
   height: 44px;
   border-radius: 8px;
-  background: #2e7d32;
+  background: #5BBDC3;
   color: #ffffff;
   border: none;
   font-size: 15px;
@@ -414,7 +417,7 @@ input:focus {
 }
 
 .login-btn:hover {
-  background: #256628;
+  background: #5BBDC3;
 }
 
 .login-links {
@@ -426,7 +429,20 @@ input:focus {
 
 .login-links a {
   margin-left: 6px;
-  color: #2e7d32;
+  color: #5BBDC3;
   text-decoration: underline;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .login-card {
+    padding: 32px 24px;
+    max-width: 100%;
+  }
+
+  .check-btn {
+    width: 90px;
+    font-size: 12px;
+  }
 }
 </style>

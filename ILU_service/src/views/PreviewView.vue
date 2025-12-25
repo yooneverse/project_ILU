@@ -9,6 +9,35 @@
     </section>
 
     <section class="insight">
+      <!-- 항해 장식 요소 -->
+      <svg class="sea-decoration ship" viewBox="0 0 100 100" width="80" height="80">
+        <g opacity="0.25" fill="#8B7355">
+          <path d="M30,70 L30,40 L50,30 L70,40 L70,70 Z"/>
+          <path d="M45,35 L45,15 L50,10 L55,15 L55,35"/>
+          <rect x="25" y="70" width="50" height="8" rx="2"/>
+        </g>
+      </svg>
+
+      <svg class="sea-decoration island-left" viewBox="0 0 100 100" width="60" height="60">
+        <g opacity="0.2" fill="#8B7355">
+          <ellipse cx="50" cy="70" rx="35" ry="15"/>
+          <path d="M30,70 Q50,40 70,70"/>
+          <circle cx="50" cy="50" r="5"/>
+        </g>
+      </svg>
+
+      <svg class="sea-decoration compass-rose-insight" viewBox="0 0 100 100" width="100" height="100">
+        <g opacity="0.2">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#8B7355" stroke-width="1.5"/>
+          <circle cx="50" cy="50" r="30" fill="none" stroke="#8B7355" stroke-width="1"/>
+          <polygon points="50,15 53,45 50,50 47,45" fill="#D4AF37"/>
+          <polygon points="50,85 53,55 50,50 47,55" fill="#8B7355"/>
+          <polygon points="15,50 45,53 50,50 45,47" fill="#8B7355"/>
+          <polygon points="85,50 55,53 50,50 55,47" fill="#D4AF37"/>
+          <text x="50" y="12" text-anchor="middle" font-size="7" fill="#8B7355" font-weight="bold">N</text>
+        </g>
+      </svg>
+
       <h2 class="reveal">
         취업의 핵심은 정보의 양이 아닌<br>
         <span>비교의 기준</span>을 찾는 일
@@ -152,7 +181,6 @@
         <div class="modal-text-side">
           <h3>{{ modalData.title }}</h3>
           <p>{{ modalData.desc }}</p>
-          <button class="match-button" @click="goToLanding">이 스타일로 매칭하기</button>
         </div>
       </div>
     </div>
@@ -211,7 +239,7 @@ onMounted(() => {
 .preview-container {
   margin: 0;
   padding: 0;
-  background-color: #fff;
+  background: linear-gradient(135deg, #e8e4d9 0%, #d4cfc2 100%);
   color: #1d1d1f;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans KR", sans-serif;
   overflow-x: hidden;
@@ -240,36 +268,172 @@ section {
 
 /* Hero Section */
 .hero {
-  background-color: var(--ilu-light);
+  background: linear-gradient(135deg, rgba(245, 230, 211, 0.98) 0%, rgba(235, 220, 200, 1) 50%, rgba(230, 215, 195, 1) 100%);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 100px rgba(139, 115, 85, 0.1);
+}
+
+/* 종이 텍스처 */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 115, 85, 0.02) 2px,
+      rgba(139, 115, 85, 0.02) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 115, 85, 0.015) 2px,
+      rgba(139, 115, 85, 0.015) 4px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 바다 패턴 배경 */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(100, 149, 237, 0.03) 40px,
+      rgba(100, 149, 237, 0.03) 42px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 40px,
+      rgba(100, 149, 237, 0.03) 40px,
+      rgba(100, 149, 237, 0.03) 42px
+    );
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .hero h1 {
   font-size: clamp(60px, 10vw, 120px);
   font-weight: 700;
-  color: #5BBDC3;
+  color: #8B7355;
   margin: 0;
   letter-spacing: -3px;
+  position: relative;
+  z-index: 1;
+  text-shadow: 2px 2px 4px rgba(255, 250, 240, 0.5);
 }
 
 .hero p {
   font-size: 24px;
-  color: var(--text-grey);
+  color: #6B5840;
   margin-top: 20px;
   font-weight: 300;
+  position: relative;
+  z-index: 1;
 }
 
 .tag {
   font-size: 14px;
   letter-spacing: 3px;
-  color: var(--text-grey);
+  color: #8B7355;
   margin-bottom: 20px;
   font-weight: 700;
+  position: relative;
+  z-index: 1;
 }
 
 /* Insight Message */
 .insight {
-  background-color: #5BBDC3;
-  color: #fff;
+  background: 
+    linear-gradient(135deg, 
+      rgba(245, 230, 211, 0.98) 0%,
+      rgba(235, 220, 200, 1) 50%,
+      rgba(230, 215, 195, 1) 100%
+    );
+  color: #5A4A3A;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 100px rgba(139, 115, 85, 0.1);
+}
+
+/* 종이 텍스처 */
+.insight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 115, 85, 0.02) 2px,
+      rgba(139, 115, 85, 0.02) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 115, 85, 0.015) 2px,
+      rgba(139, 115, 85, 0.015) 4px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 바다 패턴과 나침반 그리드 */
+.insight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(100, 149, 237, 0.03) 40px,
+      rgba(100, 149, 237, 0.03) 42px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 40px,
+      rgba(100, 149, 237, 0.03) 40px,
+      rgba(100, 149, 237, 0.03) 42px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 60px,
+      rgba(139, 115, 85, 0.1) 60px,
+      rgba(139, 115, 85, 0.1) 62px,
+      transparent 62px,
+      transparent 70px,
+      rgba(139, 115, 85, 0.1) 70px,
+      rgba(139, 115, 85, 0.1) 72px
+    ),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="2" fill="%238B7355" opacity="0.3"/></pattern></defs><rect width="400" height="400" fill="url(%23grid)"/><g opacity="0.15"><circle cx="200" cy="200" r="150" fill="none" stroke="%238B7355" stroke-width="1.5"/><circle cx="200" cy="200" r="120" fill="none" stroke="%238B7355" stroke-width="1"/><circle cx="200" cy="200" r="90" fill="none" stroke="%238B7355" stroke-width="0.8"/><line x1="200" y1="50" x2="200" y2="350" stroke="%238B7355" stroke-width="1"/><line x1="50" y1="200" x2="350" y2="200" stroke="%238B7355" stroke-width="1"/><line x1="94" y1="94" x2="306" y2="306" stroke="%238B7355" stroke-width="0.5"/><line x1="94" y1="306" x2="306" y2="94" stroke="%238B7355" stroke-width="0.5"/></g><text x="200" y="35" text-anchor="middle" font-size="14" fill="%238B7355" font-weight="bold" opacity="0.4">N</text><text x="200" y="380" text-anchor="middle" font-size="14" fill="%238B7355" font-weight="bold" opacity="0.4">S</text><text x="365" y="205" text-anchor="middle" font-size="14" fill="%238B7355" font-weight="bold" opacity="0.4">E</text><text x="35" y="205" text-anchor="middle" font-size="14" fill="%238B7355" font-weight="bold" opacity="0.4">W</text></svg>');
+  background-size: auto, auto, auto, 600px 600px;
+  background-position: 0 0, 0 0, 0 0, center center;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .insight h2 {
@@ -277,22 +441,90 @@ section {
   font-weight: 700;
   line-height: 1.2;
   margin: 0;
+  position: relative;
+  z-index: 1;
+  color: #8B7355;
+  text-shadow: 2px 2px 4px rgba(255, 250, 240, 0.5);
 }
 
 .insight h2 span {
-  color: #28697c;
+  color: #5A4A3A;
   font-weight: 700;
+}
+
+/* Insight 섹션 항해 장식 */
+.insight .sea-decoration {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  filter: drop-shadow(2px 2px 3px rgba(139, 115, 85, 0.2));
+}
+
+.insight .sea-decoration.ship {
+  top: 10%;
+  left: 8%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.insight .sea-decoration.island-left {
+  bottom: 15%;
+  left: 12%;
+  animation: float 8s ease-in-out infinite;
+  animation-delay: -2s;
+}
+
+.insight .sea-decoration.compass-rose-insight {
+  bottom: 12%;
+  right: 10%;
+  animation: rotate-slow 60s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes rotate-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Demo Showcase */
 .demo-section {
-  background-color: #fff;
+  background: linear-gradient(135deg, rgba(245, 230, 211, 0.5) 0%, rgba(235, 220, 200, 0.6) 100%);
+  position: relative;
+}
+
+.demo-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 115, 85, 0.015) 2px,
+      rgba(139, 115, 85, 0.015) 4px
+    );
+  pointer-events: none;
+  z-index: 0;
 }
 
 .demo-section h2 {
   font-size: 48px;
   margin-bottom: 60px;
-  color: #5BBDC3;
+  color: #8B7355;
+  position: relative;
+  z-index: 1;
 }
 
 .demo-grid {
@@ -305,7 +537,7 @@ section {
 }
 
 .demo-card {
-  background: var(--ilu-light);
+  background: rgba(245, 230, 211, 0.6);
   border-radius: 32px;
   padding: 40px;
   text-align: left;
@@ -319,7 +551,7 @@ section {
 }
 
 .demo-card h3 {
-  color: #5BBDC3;
+  color: #8B7355;
   font-size: 28px;
   margin-bottom: 20px;
 }
@@ -327,7 +559,7 @@ section {
 .mockup {
   width: 100%;
   height: 350px;
-  background: #fff;
+  background: rgba(253, 252, 248, 0.9);
   border-radius: 20px;
   overflow: hidden;
   border: 1px solid #ddd;
@@ -349,7 +581,7 @@ section {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #5BBDC3;
+  color: #8B7355;
   gap: 20px;
 }
 
@@ -367,14 +599,14 @@ section {
 
 /* Card Archive */
 .archive-section {
-  background-color: #fff;
+  background: linear-gradient(135deg, #e8e4d9 0%, #d4cfc2 100%);
   width: 100%;
 }
 
 .archive-section h2 {
   font-size: 48px;
   margin-bottom: 80px;
-  color: #5BBDC3;
+  color: #8B7355;
 }
 
 .card-grid {
@@ -413,6 +645,7 @@ section {
 
 /* ✅ CTA Section (LandingView 버튼) */
 .cta-section {
+  background: linear-gradient(135deg, rgba(139, 115, 85, 0.85) 0%, rgba(90, 74, 58, 0.9) 100%);
   background: linear-gradient(135deg, var(--ilu-teal) 0%, var(--ilu-teal-dark) 100%);
   min-height: 60vh;
 }
@@ -425,7 +658,7 @@ section {
 .cta-content h2 {
   font-size: clamp(36px, 6vw, 64px);
   font-weight: 700;
-  color: #5BBDC3;
+  color: #8B7355;
   margin: 0 0 20px 0;
   letter-spacing: -2px;
   white-space: nowrap;
@@ -433,7 +666,7 @@ section {
 
 .cta-content p {
   font-size: 22px;
-  color: #5BBDC3;
+  color: #8B7355;
   margin-bottom: 50px;
   font-weight: 300;
 }
@@ -445,7 +678,7 @@ section {
   padding: 22px 50px;
   background: #fff;
   color: #1d1d1f;
-  border: none;
+  border: 2px solid #8B7355;
   border-radius: 50px;
   font-size: 20px;
   font-weight: 700;
@@ -475,7 +708,7 @@ section {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(245, 230, 211, 0.95);
   backdrop-filter: blur(25px);
   z-index: 2000;
   justify-content: center;
@@ -500,7 +733,7 @@ section {
   border-radius: 40px;
   display: flex;
   overflow: hidden;
-  box-shadow: 0 50px 100px rgba(91, 189, 195, 0.2);
+  box-shadow: 0 50px 100px rgba(139, 115, 85, 0.3);
   animation: scaleIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1.2);
 }
 
@@ -521,7 +754,9 @@ section {
 .modal-img-side img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 20px;
+  background: #fff;
 }
 
 .modal-text-side {
@@ -535,7 +770,7 @@ section {
 
 .modal-text-side h3 {
   font-size: 42px;
-  color: var(--ilu-teal);
+  color: #8B7355;
   margin: 0 0 20px 0;
 }
 
@@ -545,30 +780,11 @@ section {
   color: #444;
 }
 
-.match-button {
-  margin-top: 40px;
-  padding: 18px 40px;
-  background: var(--ilu-teal);
-  color: #fff;
-  border: none;
-  border-radius: 15px;
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.match-button:hover {
-  background: var(--ilu-teal-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(91, 189, 195, 0.3);
-}
-
 .close-btn {
   position: absolute;
   top: 40px;
   right: 50px;
-  color: var(--ilu-teal);
+  color: #8B7355;
   font-size: 50px;
   cursor: pointer;
   font-weight: 100;
@@ -590,7 +806,7 @@ footer {
 .team-name {
   letter-spacing: 5px;
   font-weight: 700;
-  color: var(--ilu-teal);
+  color: #8B7355;
   margin: 0 0 20px 0;
   font-size: 18px;
 }
@@ -641,6 +857,11 @@ footer {
 
   .mockup {
     height: 250px;
+  }
+
+  /* 모바일에서 장식 요소 숨김 */
+  .sea-decoration {
+    display: none;
   }
 }
 </style>

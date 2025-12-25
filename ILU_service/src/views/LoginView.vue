@@ -145,7 +145,7 @@ const handleLogin = async () => {
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 20px;
-  color: #1b5e20;
+  color: rgba(0,0,0,1);
 }
 
 .form-group {
@@ -173,7 +173,7 @@ input {
 
 input:focus {
   outline: none;
-  border-color: #2e7d32;
+  border-color: #5BBDC3;
   background: #ffffff;
 }
 
@@ -223,7 +223,7 @@ input.input-error:focus {
   width: 100%;
   height: 44px;
   border-radius: 8px;
-  background: #2e7d32;
+  background: #5BBDC3;
   color: #ffffff;
   border: none;
   font-size: 15px;
@@ -232,7 +232,7 @@ input.input-error:focus {
 }
 
 .login-btn:hover {
-  background: #256628;
+  background: #5BBDC3;
 }
 
 .login-links {
@@ -244,7 +244,7 @@ input.input-error:focus {
 
 .login-links a {
   margin-left: 6px;
-  color: #2e7d32;
+  color: #5BBDC3;
   text-decoration: underline;
 }
 </style>
