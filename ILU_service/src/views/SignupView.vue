@@ -27,14 +27,15 @@
             </button>
           </div>
           
-          <!-- 중복 확인 결과 메시지 (항상 공간 차지) -->
-          <p class="duplicate-message" 
+          <!-- 중복 확인 결과 메시지 -->
+          <p v-if="duplicateMessage"
+             class="duplicate-message" 
              :class="{ 
                'success': !isDuplicate && isChecked, 
                'error': isDuplicate 
              }"
           >
-            {{ duplicateMessage || '&nbsp;' }}
+            {{ duplicateMessage }}
           </p>
         </div>
 
@@ -341,7 +342,7 @@ input:focus {
 }
 
 .check-btn {
-  width: 100px;
+  width: 140px;
   height: 44px;
   border-radius: 8px;
   background: #1976d2;
@@ -352,6 +353,10 @@ input:focus {
   white-space: nowrap;
   transition: background 0.2s;
   flex-shrink: 0;
+}
+
+.input-with-button input {
+  flex: 1;
 }
 
 .check-btn:hover:not(:disabled) {
@@ -366,13 +371,12 @@ input:focus {
 /* ✅ 중복 확인 메시지 */
 .duplicate-message {
   font-size: 13px;
-  margin-top: 8px;
+  margin-top: 4px;
   margin-bottom: 0;
-  min-height: 44px;
+  min-height: 0;
+  height: auto;
   font-weight: 500;
-  display: flex;
-  align-items: flex-start;
-  padding-top: 2px;
+  line-height: 1.3;
 }
 
 .duplicate-message.success {
